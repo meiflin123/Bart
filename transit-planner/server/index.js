@@ -1,5 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const getAllLines = require('../database-mysql/index.js').getAllLines;
 
 const db = require('../database-mysql');
 
@@ -14,7 +15,13 @@ app.use(bodyParser.urlencoded({extended: true}));
 
 
 app.get('/api/lines', (req, res) => {
-  // TODO - your code here!
+  getAllLines((err, data) => {
+  	if (err) {
+  		res.sendStatus(500).send(err)
+  		return;
+  	}
+  	res.json(data)
+  })
 
 });
 
