@@ -12,9 +12,21 @@ connection.connect((err) => {
 })
 
 const getAllLines = function(callback) {
-  // TODO - your code here!
+  connection.query('SELECT * FROM service_lines', (err, data) => {
+  	if (err) {
+  		callback(err);
+  		return;
+  	}
+  	callback(null, data);
+  });
 
 }
+
+/* test getALLLines function.
+getAllLines(function(err, data) {
+	console.log(data);
+})
+*/
 
 module.exports = {
   getAllLines
