@@ -15,15 +15,7 @@ const Lines = (props) => {
       </div>
       <div className="lines-stop-list">
         <ul>
-          <li>Hardcoded Stop 1</li>
-          <li>Hardcoded Stop 2</li>
-          <li>Hardcoded Stop 3</li>
-          <li>Hardcoded Stop 4</li>
-          <li>Hardcoded Stop 5</li>
-          <li>Hardcoded Stop 6</li>
-          <li>Hardcoded Stop 7</li>
-          <li>Hardcoded Stop 8</li>
-          <li>Hardcoded Stop 9</li>
+         {props.sampleStopList.stops.map((stop) => <li key={stop.id}>{stop.name}</li>)}
         </ul>
       </div>
     </div>
