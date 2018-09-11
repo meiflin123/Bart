@@ -1,18 +1,17 @@
 import React from 'react';
 import $ from 'jquery';
 
-const Lines = () => {
+
+const Lines = (props) => {
   return (
     <div className="lines-view">
       <div className="selections">
         Choose a line:
-        <select>
-          <option>Hardcoded Line A</option>
-          <option>Hardcoded Line B</option>
-          <option>Hardcoded Line C</option>
-          <option>Hardcoded Line D</option>
-          <option>Hardcoded Line E</option>
+       
+        <select>{props.sampleLines.map((line) => <option key= {props.sampleLines.indexOf(line)}>{line}</option> )}
+          
         </select>
+
       </div>
       <div className="lines-stop-list">
         <ul>

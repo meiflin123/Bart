@@ -4,6 +4,7 @@ import $ from 'jquery';
 
 import Lines from './components/Lines.jsx';
 import TripPlanner from './components/TripPlanner.jsx';
+import data from './sample_data.js';
 
 class App extends React.Component {
   constructor(props) {
@@ -45,7 +46,7 @@ class App extends React.Component {
           </nav>
           <div className="main-view">
             {this.state.view === 'lines' 
-              ? <Lines />
+              ? <Lines sampleLines = {this.props.sampleLines} sampleStopList = {this.props.sampleStopList}/>
               : <TripPlanner />
             }
           </div>
@@ -58,5 +59,5 @@ class App extends React.Component {
   }
 }
 
-ReactDOM.render(<App />, document.getElementById('app'));
+ReactDOM.render(<App sampleLines = {data.sampleLines} sampleStopList = {data.sampleStopList}/>, document.getElementById('app'));
 
