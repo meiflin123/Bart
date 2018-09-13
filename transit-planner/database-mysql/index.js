@@ -48,5 +48,6 @@ getStops(1, function(err, data) {
 })
 
 module.exports = {
-  getAllLines
+  getAllLines,
+  getStops
 };

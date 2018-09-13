@@ -29,6 +29,19 @@ app.get('/api/lines', (req, res) => {
 
 });
 
+//route handler that will respond to `GET` requests to `/api/lines/:lineId`
+app.get('/api/lines/:lineid', (req,res) => {
+  //console.log(req.params.lineid)
+  getStops(req.params.lineid, (err, data) => {
+    if (err) {
+      res.sendStatus(500).send(err)
+      return;
+    }
+    res.json(data);
+  })
+ 
+})
+
 // Write additional route handlers as needed below!
 
 app.listen(PORT, () => {
