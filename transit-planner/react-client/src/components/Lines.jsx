@@ -1,25 +1,58 @@
 import React from 'react';
 import $ from 'jquery';
+import axios from 'axios';
 
 
-const Lines = (props) => {
-  return (
-    <div className="lines-view">
-      <div className="selections">
-        Choose a line:
-       
-        <select>{props.sampleLines.map((line) => <option key= {props.sampleLines.indexOf(line)}>{line}</option> )}
-          
-        </select>
+class Lines extends React.Component {
+  constructor(props) {
+    super(props);
 
+    this.state = {
+      lines: []
+    }
+    this.getAllLines = this.getAllLines.bind(this);
+  }
+  
+  getAllLines() {
+    axios.get('/api/lines')
+      .then(
+        (response) => {
+        var lines = response.data
+        this.setState({lines : lines});
+        
+        
+      })
+      .catch((error) => {
+        console.log(error)
+      })
+
+
+  };
+  
+
+  
+  componentDidMount (){
+    this.getAllLines()
+  }
+  render () {
+    return (
+      <div className="lines-view">
+        <div className="selections">
+          Choose a line:
+         
+         <select>{this.state.lines.map((line) => (<option value={line.id} key={line.id}>{line.name}</option>))}
+            
+          </select>
+
+        </div>
+        <div className="lines-stop-list">
+          {/*<ul>
+           {props.sampleStopList.stops.map((stop) => <li key={stop.id}>{stop.name}</li>)}
+          </ul>*/}
+        </div>
       </div>
-      <div className="lines-stop-list">
-        <ul>
-         {props.sampleStopList.stops.map((stop) => <li key={stop.id}>{stop.name}</li>)}
-        </ul>
-      </div>
-    </div>
-  );
+    );
+  }
 }
 
 export default Lines;

@@ -14,13 +14,17 @@ app.use(bodyParser.urlencoded({extended: true}));
  app.use(express.static(__dirname + '/../react-client/dist'));
 
 
+// request handler that respond to `GET` requests to `/api/lines` 
+
 app.get('/api/lines', (req, res) => {
   getAllLines((err, data) => {
   	if (err) {
   		res.sendStatus(500).send(err)
   		return;
   	}
-  	res.json(data)
+  	console.log('server retrieve data:',  data);
+
+  	res.json((data));
   })
 
 });
