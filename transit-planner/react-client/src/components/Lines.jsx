@@ -48,7 +48,7 @@ class Lines extends React.Component {
 
     axios.get('/api/lines/' + lineid)
       .then((response) => {
-        var stops = response.data
+        const stops = response.data
         this.setState({stops: stops})
         console.log('all stops along this line:', this.state.stops)
           })

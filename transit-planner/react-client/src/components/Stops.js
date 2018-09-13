@@ -3,12 +3,18 @@ import $ from 'jquery';
 
 
 const Stops = (props) => {
-	
+
+
+	const onClick = (event) => {
+
+	  console.log('stationID is ', event.target.value)
+	  const stationID = event.target.value
+	}
     return (
       
         <div className="lines-stop-list">
           <ul>
-           {props.stopsList.map((stop) => <li key={stop.id}>{stop.name}</li>)}
+           {props.stopsList.map((stop) => <li onClick = {onClick} value = {stop.station_id} key={stop.id}>{stop.name}</li>)}
           </ul>
         </div>
    
