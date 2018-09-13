@@ -1,6 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const getAllLines = require('../database-mysql/index.js').getAllLines;
+const getStops = require('../database-mysql/index.js').getStops;
 
 const db = require('../database-mysql');
 

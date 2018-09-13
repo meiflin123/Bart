@@ -9,10 +9,16 @@ class Lines extends React.Component {
     super(props);
 
     this.state = {
-      lines: []
+      lines: [],
+      stops: []
     }
     this.getAllLines = this.getAllLines.bind(this);
+    this.selectLine = this.selectLine.bind(this);
+    this.getStops = this.getStops.bind(this);
   }
+
+
+  
   
   getAllLines() {
     axios.get('/api/lines')
@@ -30,9 +36,31 @@ class Lines extends React.Component {
   };
   
 
-  
+  selectLine (event) {
+  //console.log(event.target.value);
+
+    this.getStops(event.target.value)
+
+ }
+
+  getStops(lineid) {
+    console.log('line selected is: ' + lineid);
+
+    axios.get('/api/lines/' + lineid)
+      .then((response) => {
+        var stops = response.data
+        this.setState({stops: stops})
+        console.log('all stops along this line:', this.state.stops)
+          })
+
+      .catch((error)=>{
+         console.log(error);
+        })
+
+  }
   componentDidMount (){
-    this.getAllLines()
+    this.getAllLines();
+    this.getStops(1)
   }
   render () {
     return (
@@ -40,13 +68,13 @@ class Lines extends React.Component {
         <div className="selections">
           Choose a line:
          
-         <select>{this.state.lines.map((line) => (<option value={line.id} key={line.id}>{line.name}</option>))}
+         <select onChange= {this.selectLine}>{this.state.lines.map((line) => (<option value={line.id} key={line.id}>{line.name}</option>))}
             
           </select>
 
         </div>
         <div className="lines-stop-list">
-          {<Stops stopsList={this.props.sampleStopList}/>}
+          {<Stops stopsList={this.state.stops}/>}
         </div>
       </div>
     );
