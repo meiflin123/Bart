@@ -1,5 +1,6 @@
 import React from 'react';
 import $ from 'jquery';
+import axios from 'axios';
 
 
 const Stops = (props) => {
@@ -7,9 +8,19 @@ const Stops = (props) => {
 
 	const onClick = (event) => {
 
-	  console.log('stationID is ', event.target.value)
-	  const stationID = event.target.value
-	}
+	  console.log('stationId is ', event.target.value)
+	  const stationId = event.target.value
+	  axios.post('/api/toggleFavStation/' + stationId)
+  
+      .then((response) => {
+      	console.log('stop component toggle station: ', response.data);
+
+        })
+          
+      .catch((error)=>{
+         console.log(error);
+        })
+    }
     return (
       
         <div className="lines-stop-list">

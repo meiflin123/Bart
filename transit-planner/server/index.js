@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const getAllLines = require('../database-mysql/index.js').getAllLines;
 const getStops = require('../database-mysql/index.js').getStops;
+const toggleFavStation = require('../database-mysql/index.js').toggleFavStation;
 
 const db = require('../database-mysql');
 
@@ -33,14 +34,33 @@ app.get('/api/lines', (req, res) => {
 //route handler that will respond to `GET` requests to `/api/lines/:lineId`
 app.get('/api/lines/:lineid', (req,res) => {
   //console.log(req.params.lineid)
-  getStops(req.params.lineid, (err, data) => {
+  const lineid = req.params.lineid;
+  getStops(lineid, (err, data) => {
     if (err) {
       res.sendStatus(500).send(err)
       return;
     }
     res.json(data);
   })
+  
+})
+
+//handler that respond to POST requests to '/api/toggleFavStation/:stationId' 
+app.post('/api/toggleFavStation/:stationId', (req, res) => {
+  const stationId = req.params.stationId;
+
  
+  toggleFavStation(stationId, (err, data) => {
+    if(err) {
+      return res.status(500).send(err);
+    }
+
+    res.json(data);
+
+
+  })
+
+
 })
 
 // Write additional route handlers as needed below!
