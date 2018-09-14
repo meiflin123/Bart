@@ -48,20 +48,7 @@ const getStops = function(lineid, callback) {
 })*/
 
 
-const getStation = function(stationId, toggleFavStation) {
-
-  var query = "SELECT * FROM stations WHERE id = ?"
-  connection.query(query, stationId, (err, data) => {
-    if (err) {
-      callback(err);
-      return;
-    }
-    console.log('database getStation: ', data);
-    toggleFavStation(data, callback)
-  })
-
-}
-
+// a function that will update the database for the station that get toggled. 
 const toggleFavStation = function(stationId, callback) {
   var stationData = 'SELECT * FROM stations WHERE id = ?'
   var makeFav = 'UPDATE stations SET is_favorite = 1 WHERE stations.id = ?';
@@ -72,16 +59,35 @@ const toggleFavStation = function(stationId, callback) {
       callback(err);
       return;
     }
-    console.log('station data from database is', data);
+    console.log('station data from database is', data, typeof data, data[0].id, data[0].is_favorite === 0)
   
-    
+    if(data[0].is_favorite === 0) {
+  
+      connection.query(makeFav, stationId, (err, data) => {
+        if (err) {
+          callback(err);
+          return;
+        }
+        callback(null, 'makeFav')
+      })
+    }
+
+
+    if (data[0].is_favorite === 1) {
+      connection.query(removeFav, stationId, (err, data) => {
+        if (err) {
+          callback(err);
+          return;
+        }
+        callback(null, 'removeFav')
+      })
+    }
   })}
 
 
 module.exports = {
   getAllLines,
   getStops,
-  getStation,
   toggleFavStation
 
 };
