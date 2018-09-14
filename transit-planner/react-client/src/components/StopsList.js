@@ -1,9 +1,10 @@
 import React from 'react';
 import $ from 'jquery';
 import axios from 'axios';
+import Station from './station.js'
 
 
-const Stops = (props) => {
+const StopsList = (props) => {
 
 
 	const onClick = (event) => {
@@ -13,8 +14,7 @@ const Stops = (props) => {
 	  axios.post('/api/toggleFavStation/' + stationId)
   
       .then((response) => {
-      	console.log('stop component toggle station: ', response.data);
-
+      	
         })
           
       .catch((error)=>{
@@ -34,4 +34,4 @@ const Stops = (props) => {
   }
 
 
-export default Stops;
+export default StopsList;

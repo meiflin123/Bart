@@ -1,7 +1,7 @@
 import React from 'react';
 import $ from 'jquery';
 import axios from 'axios';
-import Stops from  './Stops.js';
+import StopsList from  './StopsList.js';
 
 
 class Lines extends React.Component {
@@ -74,7 +74,7 @@ class Lines extends React.Component {
 
         </div>
         <div className="lines-stop-list">
-          {<Stops stopsList={this.state.stops}/>}
+          {<StopsList stopsList={this.state.stops}/>}
         </div>
       </div>
     );
