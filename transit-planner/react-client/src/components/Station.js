@@ -3,34 +3,57 @@ import $ from 'jquery';
 import axios from 'axios';
 
 
-const Station = (props) => {
+class Station extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      // station status is favorite?
+      station: false
+    }
+    this.toggleFavStation = this.toggleFavStation.bind(this);
+  }
 
-	const onClick = (event) => {
+  
+
+	toggleFavStation(event) {
 
 	  console.log('stationId is ', event.target.value)
 	  const stationId = event.target.value
 	  axios.post('/api/toggleFavStation/' + stationId)
   
       .then((response) => {
-      	
+        this.setState({
+          station: response.data
         })
+        
+      })
           
       .catch((error)=>{
          console.log(error);
-        })
+      })
     }
 
+
+  render() {
     return (
       
         <div className="station">
+           <li onClick = {this.toggleFavStation} value = {this.props.station.station_id}>
+           {this.state.station 
+             ? <b>{this.props.station.name}</b>
+             : this.props.station.name
+
+           }
+           </li>
           
-           <li onClick = {onClick} value = {props.station.station_id}> {props.station.name}</li> 
+        
           
         </div>
    
     );
 
   }
+}
 
 
 export default Station;

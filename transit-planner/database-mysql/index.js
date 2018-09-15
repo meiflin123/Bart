@@ -68,7 +68,7 @@ const toggleFavStation = function(stationId, callback) {
           callback(err);
           return;
         }
-        callback(null, 'makeFav')
+        callback(null, true)
       })
     }
 
@@ -79,7 +79,7 @@ const toggleFavStation = function(stationId, callback) {
           callback(err);
           return;
         }
-        callback(null, 'removeFav')
+        callback(null, false)
       })
     }
   })}
