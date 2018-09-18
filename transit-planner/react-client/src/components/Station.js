@@ -13,7 +13,7 @@ class Station extends React.Component {
     this.toggleFavStation = this.toggleFavStation.bind(this);
   }
 
-  
+
 
 	toggleFavStation(event) {
 
@@ -33,6 +33,12 @@ class Station extends React.Component {
       })
     }
 
+
+  componentDidMount (){
+    this.setState({
+      station: this.props.station.is_favorite
+    })
+  }
 
   render() {
     return (
