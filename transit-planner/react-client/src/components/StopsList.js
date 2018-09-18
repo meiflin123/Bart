@@ -5,12 +5,13 @@ import Station from './station.js'
 
 
 const StopsList = (props) => {
-	
+
     return (
       
         <div className="lines-stop-list">
           <ul>
-           {props.stopsList.map((stop, index) => <Station station = {stop} key={index}/>)}
+           {props.stopsList.map((stop, index) => <Station station = {stop} key={stop.id}/>)}
+
           </ul>
         </div>
    
