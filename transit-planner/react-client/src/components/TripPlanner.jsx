@@ -15,14 +15,16 @@ class TripPlanner extends React.Component {
 
   }
 
+// write a function to display all stations 
   getStationList() {
      axios.get('/api/stations/')
 
       .then((response) => {
         var stations = response.data
-        this.setState({stationList: stations})
+        // display stations that are marked favorite in the db first
+        this.setState({stationList: stations.sort((a, b) => b.is_favorite - a.is_favorite)})
         
-        /*console.log('stations are', stations, 'the state is ', this.state.stationsList)*/
+        /*console.log('stations are', stations, 'the state is ', this.state.stationList)*/
       })
       .catch((error)=>{
          console.log(error);
@@ -30,7 +32,8 @@ class TripPlanner extends React.Component {
   }
 
   componentDidMount() {
-    this.getStationList()
+    this.getStationList();
+    
   }
 
 
@@ -41,15 +44,14 @@ class TripPlanner extends React.Component {
       <div className="trip-planner-view">
         <div className="selections">
           Start: 
-          <select>{this.state.stationList.map((station) => 
-            <option key={station.id}>{station.name}</option>)}
+
+          <select>{this.state.stationList.map((station) => <option key={station.id}>{station.name}</option>)}
           </select>
 
           <br />
 
           End: 
-          <select>{this.state.stationList.map((station) => 
-            <option key={station.id}>{station.name}</option>)}
+          <select>{this.state.stationList.map((station) => <option key={station.id}>{station.name}</option>)}
           </select>
 
           <br />
