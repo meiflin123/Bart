@@ -8,13 +8,13 @@ class Station extends React.Component {
     super(props);
     this.state = {
       // station status is favorite?
-      station: false
+      station: this.props.station.is_favorite
     }
     this.toggleFavStation = this.toggleFavStation.bind(this);
   }
 
 
-
+// toggleFavStation would toggle the is_favorite status of a station in the database. 
 	toggleFavStation(event) {
 
 	  console.log('stationId is ', event.target.value)
@@ -33,20 +33,13 @@ class Station extends React.Component {
       })
     }
 
-
-  componentDidMount (){
-    this.setState({
-      station: this.props.station.is_favorite
-    })
-  }
-
   render() {
     return (
       
         <div className="station">
            <li onClick = {this.toggleFavStation} value = {this.props.station.station_id}>
            {this.state.station 
-             ? <b>{this.props.station.name}</b>
+             ? this.props.station.name + '  ⭐️' 
              : this.props.station.name
 
            }
