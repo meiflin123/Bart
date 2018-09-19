@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 const getAllLines = require('../database-mysql/index.js').getAllLines;
 const getStops = require('../database-mysql/index.js').getStops;
 const toggleFavStation = require('../database-mysql/index.js').toggleFavStation;
+const getStations = require('../database-mysql/index.js').getStations;
 
 const db = require('../database-mysql');
 
@@ -63,6 +64,19 @@ app.post('/api/toggleFavStation/:stationId', (req, res) => {
 
 })
 
+// handler that respond to Get request to '/api/stations/'
+app.get('/api/stations/', (req, res) => {
+
+  getAllStations((err, data) => {
+
+    if (err) {
+      res.sendStatus(500).send(err)
+      return;
+    }
+    res.json(data)
+  })
+
+});
 // Write additional route handlers as needed below!
 
 app.listen(PORT, () => {
