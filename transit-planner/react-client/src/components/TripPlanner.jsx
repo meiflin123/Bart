@@ -11,19 +11,28 @@ class TripPlanner extends React.Component {
       stationList: []
     }
 
+    this.getStationList = this.getStationList.bind(this);
+
   }
 
   getStationList() {
      axios.get('/api/stations/')
-     
+
       .then((response) => {
         var stations = response.data
-        this.setState({stationsList: stations})
+        this.setState({stationList: stations})
+        
+        /*console.log('stations are', stations, 'the state is ', this.state.stationsList)*/
       })
       .catch((error)=>{
          console.log(error);
        })
   }
+
+  componentDidMount() {
+    this.getStationList()
+  }
+
 
 
 

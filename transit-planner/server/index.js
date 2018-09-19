@@ -67,7 +67,7 @@ app.post('/api/toggleFavStation/:stationId', (req, res) => {
 // handler that respond to Get request to '/api/stations/'
 app.get('/api/stations/', (req, res) => {
 
-  getAllStations((err, data) => {
+  getStations((err, data) => {
 
     if (err) {
       res.sendStatus(500).send(err)
