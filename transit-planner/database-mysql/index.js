@@ -85,9 +85,22 @@ const toggleFavStation = function(stationId, callback) {
   })}
 
 
+// create a function that gets all stations from db
+const getStations = function(callback) {
+
+  connection.query('SELECT * FROM stations', (err, data) => {
+    if (err) {
+      callback(err);
+      return;
+    }
+    callback(null, data)
+  })
+
+}
 module.exports = {
   getAllLines,
   getStops,
-  toggleFavStation
+  toggleFavStation,
+  getStations
 
 };
