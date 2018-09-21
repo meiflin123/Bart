@@ -4,6 +4,7 @@ const getAllLines = require('../database-mysql/index.js').getAllLines;
 const getStops = require('../database-mysql/index.js').getStops;
 const toggleFavStation = require('../database-mysql/index.js').toggleFavStation;
 const getStations = require('../database-mysql/index.js').getStations;
+const getLineId = require('../database-mysql/index.js').getLineId;
 
 const db = require('../database-mysql');
 
@@ -77,6 +78,19 @@ app.get('/api/stations/', (req, res) => {
   })
 
 });
+
+
+app.get('/api/station/:stationId', (req, res) => {
+	const stationId = req.params.stationId;
+	getLineId(stationId, (err, data) => {
+    if (err) {
+      res.sendStatus(500).send(err)
+      return;
+    }
+    res.json(data);
+  })
+
+})
 // Write additional route handlers as needed below!
 
 app.listen(PORT, () => {

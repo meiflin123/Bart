@@ -11,7 +11,7 @@ connection.connect((err) => {
 	console.log('connected to mysql!')
 })
 
-// a function to retrieve all of the lines from the `service_lines` table in the database.
+//retrieve all lines from the `service_lines` table in the database.
 const getAllLines = function(callback) {
   connection.query('SELECT * FROM service_lines', (err, data) => {
   	if (err) {
@@ -29,7 +29,7 @@ getAllLines(function(err, data) {
 })
 */
 
-//a function that will query the database for all of the stops found along a line, according to that line's `id`.
+//get all stops found along a line, according to that line's `id`.
 const getStops = function(lineid, callback) {
   var query = 'SELECT *  FROM stations, stops WHERE stops.line_id = ? AND stations.id = stops.station_id;'
   connection.query(query, lineid, (err, data) => {
@@ -48,7 +48,7 @@ const getStops = function(lineid, callback) {
 })*/
 
 
-// a function that will update the database for the station that get toggled. 
+// toggle a station to be favorite or to be unfavorite. 
 const toggleFavStation = function(stationId, callback) {
   var stationData = 'SELECT * FROM stations WHERE id = ?'
   var makeFav = 'UPDATE stations SET is_favorite = 1 WHERE stations.id = ?';
@@ -85,7 +85,7 @@ const toggleFavStation = function(stationId, callback) {
   })}
 
 
-// create a function that gets all stations from db
+// gets all stations 
 const getStations = function(callback) {
 
   connection.query('SELECT * FROM stations', (err, data) => {
@@ -97,10 +97,25 @@ const getStations = function(callback) {
   })
 
 }
+//get a station's lineid according to that station's `id`.
+const getLineId = function(stationId, callback) {
+  var query = 'SELECT line_id  FROM stops where station_id = ?'
+  connection.query(query, stationId, (err, data) => {
+    if (err) {
+      callback(err);
+      return;
+    }
+    callback(null, data)
+    console.log('database: lineid', data)
+  })
+
+
+}
 module.exports = {
   getAllLines,
   getStops,
   toggleFavStation,
-  getStations
+  getStations,
+  getLineId
 
 };
