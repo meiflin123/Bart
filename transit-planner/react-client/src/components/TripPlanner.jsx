@@ -15,7 +15,8 @@ class TripPlanner extends React.Component {
       endingStationId: null,
       linesOfStartStation: null,
       linesOfEndingStation: null,
-      stops: []
+      stops: [],
+      toward: null
 
     }
 
@@ -88,9 +89,10 @@ class TripPlanner extends React.Component {
             for (var j = 0; j < this.state.linesOfEndingStation.length; j++) {
               if (this.state.linesOfStartStation[i].line_id === this.state.linesOfEndingStation[j].line_id) {
                 commonLine = this.state.linesOfStartStation[i].line_id
+                this.getStops(commonLine)
                 
               }
-              this.getStops(commonLine)
+              
             }
           }
         })
@@ -107,7 +109,19 @@ class TripPlanner extends React.Component {
 
     axios.get('/api/lines/' + lineid)
       .then((response) => {
-        const stops = response.data
+        this.setState({toward: response.data[response.data.length-1].name})
+        var startingStop = null;
+        var endingStop = null
+        for (var i = 0; i < response.data.length; i++) {
+          if (response.data[i].station_id === this.state.startingStationId) {
+            startingStop = i 
+          }
+          if (response.data[i].station_id === this.state.endingStationId) {
+            endingStop = i 
+          }
+        }
+        
+        const stops = response.data.slice(startingStop, endingStop+1)
 
 
         this.setState({stops: stops})
@@ -165,12 +179,10 @@ class TripPlanner extends React.Component {
             <div className="directions-line-header">
               <div className="line-circle" style={{backgroundColor: "#ed1d24"}}></div>
               <p className="line-name">Red Line</p>
-              <p className="line-direction">towards Station C</p>
+              <p className="line-direction">towards {this.state.toward}</p>
             </div>
             <ul>
-              <li> Station A </li>
-              <li> Station B </li>
-              <li> Station C </li>
+              {this.state.stops.map((stop) => (<li key={stop.id}>{stop.name}</li>))}
             </ul>
           </div>
 
