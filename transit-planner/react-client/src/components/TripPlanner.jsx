@@ -89,6 +89,7 @@ class TripPlanner extends React.Component {
             for (var j = 0; j < this.state.linesOfEndingStation.length; j++) {
               if (this.state.linesOfStartStation[i].line_id === this.state.linesOfEndingStation[j].line_id) {
                 commonLine = this.state.linesOfStartStation[i].line_id
+                console.log('lineid is', commonLine)
                 this.getStops(commonLine)
                 
               }
@@ -110,23 +111,30 @@ class TripPlanner extends React.Component {
     axios.get('/api/lines/' + lineid)
       .then((response) => {
         this.setState({toward: response.data[response.data.length-1].name})
-        var startingStop = null;
-        var endingStop = null
+        var startingStopId = null;
+        var endingStopId= null;
+        var stops = null
+        console.log('response.data is', response.data )
         for (var i = 0; i < response.data.length; i++) {
           if (response.data[i].station_id === this.state.startingStationId) {
-            startingStop = i 
+            startingStopId = i 
+            console.log(this.state.startingStationId, response.data[i])
           }
           if (response.data[i].station_id === this.state.endingStationId) {
-            endingStop = i 
+            endingStopId = i 
+            console.log(this.state.endingStationId, response.data[i])
           }
         }
-        
-        const stops = response.data.slice(startingStop, endingStop+1)
+        if (startingStopId > endingStopId) {
+          stops = response.data.slice(endingStopId, startingStopId + 1).reverse();
+        } else {
+          stops = response.data.slice(startingStopId, endingStopId + 1)
+        }
 
-
-        this.setState({stops: stops})
-        console.log('all stops along this line:', this.state.stops)
-          })
+          console.log(startingStopId, endingStopId+1)
+          this.setState({stops: stops})
+          console.log('all stops along this line:', this.state.stops)
+            })
 
       .catch((error)=>{
          console.log(error);
