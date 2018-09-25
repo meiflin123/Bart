@@ -125,6 +125,7 @@ class TripPlanner extends React.Component {
             console.log(this.state.endingStationId, response.data[i])
           }
         }
+        
         if (startingStopId > endingStopId) {
           stops = response.data.slice(endingStopId, startingStopId + 1).reverse();
         } else {
