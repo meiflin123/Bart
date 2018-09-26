@@ -5,6 +5,7 @@ const getStops = require('../database-mysql/index.js').getStops;
 const toggleFavStation = require('../database-mysql/index.js').toggleFavStation;
 const getStations = require('../database-mysql/index.js').getStations;
 const getLineId = require('../database-mysql/index.js').getLineId;
+const getTransfer = require('../database-mysql/index.js').getTransfer;
 
 const db = require('../database-mysql');
 
@@ -18,7 +19,7 @@ app.use(bodyParser.urlencoded({extended: true}));
  app.use(express.static(__dirname + '/../react-client/dist'));
 
 
-// request handler that respond to `GET` requests to `/api/lines` 
+// get all lines
 
 app.get('/api/lines', (req, res) => {
   getAllLines((err, data) => {
@@ -33,7 +34,7 @@ app.get('/api/lines', (req, res) => {
 
 });
 
-//route handler that will respond to `GET` requests to `/api/lines/:lineId`
+// get user selected line's all stops 
 app.get('/api/lines/:lineid', (req,res) => {
   //console.log(req.params.lineid)
   const lineid = req.params.lineid;
@@ -47,7 +48,7 @@ app.get('/api/lines/:lineid', (req,res) => {
   
 })
 
-//handler that respond to POST requests to '/api/toggleFavStation/:stationId' 
+//toggle station to be favorite or unfavorite
 app.post('/api/toggleFavStation/:stationId', (req, res) => {
   const stationId = req.params.stationId;
 
@@ -65,7 +66,7 @@ app.post('/api/toggleFavStation/:stationId', (req, res) => {
 
 })
 
-// handler that respond to Get request to '/api/stations/'
+// get all stations 
 app.get('/api/stations/', (req, res) => {
 
   getStations((err, data) => {
@@ -79,7 +80,7 @@ app.get('/api/stations/', (req, res) => {
 
 });
 
-
+//get a list of line_id for a selected station
 app.get('/api/station/:stationId', (req, res) => {
 	const stationId = req.params.stationId;
 	getLineId(stationId, (err, data) => {
@@ -90,6 +91,17 @@ app.get('/api/station/:stationId', (req, res) => {
     res.json(data);
   })
 
+})
+
+app.get('/api/transfer/:lineId', (req, res) => {
+  const lineId = req.params.lineId;
+  getTransfer(lineId, (err, data) => {
+    if (err) {
+      res.sendStatus(500).send(err)
+      return;
+    }
+    res.json(data);
+  })
 })
 // Write additional route handlers as needed below!
 

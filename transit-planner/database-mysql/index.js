@@ -109,7 +109,18 @@ const getLineId = function(stationId, callback) {
     callback(null, data)
     console.log('database: lineid', data)
   })
+}
 
+const getTransfer = function(lineId, callback) {
+  var query = 'SELECT station_id from stops where is_transfer = 1 AND line_id = ?'
+  connection.query(query, lineId, (err, data) => {
+    if (err) {
+      callback(err);
+      return;
+    }
+    callback(null, data)
+    console.log('database: transfer station on this line is', data)
+  })
 
 }
 module.exports = {
@@ -117,6 +128,6 @@ module.exports = {
   getStops,
   toggleFavStation,
   getStations,
-  getLineId
-
+  getLineId,
+  getTransfer
 };
