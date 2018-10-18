@@ -24,9 +24,9 @@ class TripPlanner extends React.Component {
     this.getStationList = this.getStationList.bind(this);
     this.selectStart = this.selectStart.bind(this);
     this.selectEnd = this.selectEnd.bind(this);
-    this.getRoute = this.getRoute.bind(this);
+    this.getDirection = this.getDirection.bind(this);
     this.transfer = this.transfer.bind(this);
-    this.getStops = this.getStops.bind(this);
+    this.getRoute = this.getRoute.bind(this);
 
   }
 
@@ -59,7 +59,7 @@ class TripPlanner extends React.Component {
 
 
 
-  getRoute() {
+  getDirection() {
     console.log('starting station is ' + this.state.startingStation + ' station_id is ' + this.state.startingStationId);
     console.log('ending station is ' + this.state.endingStation + ' station_id is ' + this.state.endingStationId)
 
@@ -81,24 +81,22 @@ class TripPlanner extends React.Component {
         console.log('lines for ending_id:' + response.data)
         const lines2 = response.data;
         var shareLine = null;
+        var lineCombinations = [];
         this.setState({linesOfEndingStation: lines2}, () => {
 
           for (var i = 0; i < this.state.linesOfStartStation.length; i++) {
             for (var j = 0; j < this.state.linesOfEndingStation.length; j++) {
-
+              lineCombinations.push([this.state.linesOfStartStation[i].line_id, this.state.linesOfEndingStation[j].line_id])
               // if lines1 and lines2 have share same line
               if (this.state.linesOfStartStation[i].line_id === this.state.linesOfEndingStation[j].line_id) {
                 // get line id where the direaction is correct
-                this.getStops(this.state.linesOfStartStation[i].line_id)
-                   
-              // if no same line found in lines1 and lines2, need transfer
-              } /*else {
-                this.transfer(this.state.linesOfStartStation[i].line_id, this.state.linesOfEndingStation[j].line_id)
-              }*/
-              
-            }
+                this.getRoute(this.state.linesOfStartStation[i].line_id)
+    
+              }
+            } 
+            // if no share line, compare all lines combinations and find common transfer stations
+          } return lineCombinations.map(x => this.transfer(x));
 
-          }
         })
       })
         .catch((error)=>{
@@ -106,15 +104,16 @@ class TripPlanner extends React.Component {
          })
   }
 
-  getStops(lineid) {
+  getRoute(lineid) {
     console.log('line selected is: ' + lineid);
 
     axios.get('/api/lines/' + lineid)
       .then((response) => {
-        console.log('getstops ' + response)
+        console.log('getRoute ' + response)
         const stops = response.data.map(x => x.name)
         console.log('all stops along this line:', stops);
 
+        // if the starting station is put before the ending station in this stops array, right direction is found.
         if(stops.indexOf(this.state.startingStation) < stops.indexOf(this.state.endingStation)) {
           return this.getStopsNoTransfer(lineid)
         }
@@ -166,17 +165,20 @@ class TripPlanner extends React.Component {
 
   }
 
-  transfer(lineId1, lineId2) {
+  transfer(lines) {
+    var lineId1 = lines[0];
+    var lineId2 = lines[1];
     var transferStations1 = [];
     var transferStations2 = [];
     var transfer_station = 'station_id'
     var index = null;
+    console.log(lineId1, lineId2)
     
-    // get the list of transfer stations on lineId1
+    // get transfer stations on lineId1
     axios.get('/api/transfer/' + lineId1)
       .then((response) => {
         transferStations1 = response.data;
-        console.log(transferStations1)
+        console.log('transferStations on line1' + transferStations1)
       })
       .catch((error)=>{
          console.log(error);
@@ -185,13 +187,13 @@ class TripPlanner extends React.Component {
     axios.get('/api/transfer/' + lineId2)
       .then((response) => {
         const transferStations2 = response.data;
-        console.log(transferStations2)
+        console.log('transferStations on line2' + transferStations2)
         for (var i = 0; i < transferStations1.length; i++) {
           for (var j = 0; j < transferStations2.length; j++) {
             if (transferStations1[i].station_id === transferStations2[j].station_id) {
               transfer_station = transferStations1[i].station_id;
               console.log('transferPoint is', transfer_station)
-              this.getStops(lineId1, transfer_station)
+              this.getRoute(lineId1, transfer_station)
               // get the index of the transfer_station in the state of stops array.
             }
           }
@@ -204,7 +206,7 @@ class TripPlanner extends React.Component {
     
   }
 
-  /*getStops(lineid, transfer_station) {
+  /*getRoute(lineid, transfer_station) {
     console.log('line selected is: ' + lineid);
 
     axios.get('/api/lines/' + lineid)
@@ -253,7 +255,7 @@ class TripPlanner extends React.Component {
 
           <br />
 
-          <button onClick ={this.getRoute}>Go!</button>
+          <button onClick ={this.getDirection}>Go!</button>
         </div>
 
         <div className="directions">
