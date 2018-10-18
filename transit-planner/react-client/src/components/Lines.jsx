@@ -1,7 +1,7 @@
 import React from 'react';
 import $ from 'jquery';
 import axios from 'axios';
-import StopsList from  './StopsList.js';
+import StopsList from  './StopsList.jsx';
 
 
 class Lines extends React.Component {

@@ -1,7 +1,7 @@
 import React from 'react';
 import $ from 'jquery';
 import axios from 'axios';
-import Station from './station.js'
+import Station from './station.jsx'
 
 
 const StopsList = (props) => {

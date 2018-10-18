@@ -119,7 +119,7 @@ const getTransfer = function(lineId, callback) {
       return;
     }
     callback(null, data)
-    console.log('database: transfer station on this line is', data)
+    console.log('database: transfer station on this line', data)
   })
 
 }

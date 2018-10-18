@@ -15,6 +15,7 @@ class TripPlanner extends React.Component {
       endingStationId: null,
       linesOfStartStation: null,
       linesOfEndingStation: null,
+      /*line_id: null,*/
       stops: [],
       toward: null
 
@@ -38,7 +39,7 @@ class TripPlanner extends React.Component {
         // display stations that are marked favorite in the db first
         this.setState({stationList: stations.sort((a, b) => b.is_favorite - a.is_favorite)})
         
-        /*console.log('stations are', stations, 'the state is ', this.state.stationList)*/
+        console.log('the state is ', this.state.stationList)
       })
       .catch((error)=>{
          console.log(error);
@@ -55,6 +56,8 @@ class TripPlanner extends React.Component {
 
   }
 
+
+
   getRoute() {
     console.log('starting station is ' + this.state.startingStation + ' station_id is ' + this.state.startingStationId);
     console.log('ending station is ' + this.state.endingStation + ' station_id is ' + this.state.endingStationId)
@@ -63,6 +66,7 @@ class TripPlanner extends React.Component {
     //fetch lines that contain the starting station
     axios.get('/api/station/' + this.state.startingStationId)
       .then((response) => {
+        console.log('lines for starting_id:' + response.data)
         const lines1 = response.data;
         this.setState({linesOfStartStation: lines1})
       })
@@ -73,6 +77,7 @@ class TripPlanner extends React.Component {
     // fetch lines that contain the ending station
     axios.get('/api/station/' + this.state.endingStationId)
       .then((response) => {
+        console.log('lines for ending_id:' + response.data)
         const lines2 = response.data;
         var shareLine = null;
         this.setState({linesOfEndingStation: lines2}, () => {
@@ -80,18 +85,18 @@ class TripPlanner extends React.Component {
           for (var i = 0; i < this.state.linesOfStartStation.length; i++) {
             for (var j = 0; j < this.state.linesOfEndingStation.length; j++) {
 
-              // if lines1 and lines2 have same line
+              // if lines1 and lines2 have share same line
               if (this.state.linesOfStartStation[i].line_id === this.state.linesOfEndingStation[j].line_id) {
-                shareLine = this.state.linesOfStartStation[i].line_id;
-                return this.getStopsNoTransfer(shareLine)
-
-
+                // get line id where the direaction is correct
+                this.getStops(this.state.linesOfStartStation[i].line_id)
+                   
               // if no same line found in lines1 and lines2, need transfer
-              } else {
+              } /*else {
                 this.transfer(this.state.linesOfStartStation[i].line_id, this.state.linesOfEndingStation[j].line_id)
-              }
+              }*/
               
             }
+
           }
         })
       })
@@ -100,6 +105,30 @@ class TripPlanner extends React.Component {
          })
   }
 
+  getStops(lineid) {
+    console.log('line selected is: ' + lineid);
+
+    axios.get('/api/lines/' + lineid)
+      .then((response) => {
+        console.log('getstops ' + response)
+        const stops = response.data.map(x => x.name)
+        console.log('all stops along this line:', stops);
+
+        if(stops.indexOf(this.state.startingStation) < stops.indexOf(this.state.endingStation)) {
+          return this.getStopsNoTransfer(lineid)
+        }
+        
+    
+        })
+
+      .catch((error)=>{
+         console.log(error);
+        })
+
+  }
+
+
+  
   getStopsNoTransfer(lineid) {
     console.log('no transfer, line id is: ' + lineid);
 
@@ -124,11 +153,8 @@ class TripPlanner extends React.Component {
           }
         }
         
-        if (startingStopIndex > endingStopIndex) {
-          stops = response.data.slice(endingStopIndex, startingStopIndex + 1).reverse();
-        } else {
+        
           stops = response.data.slice(startingStopIndex, endingStopIndex + 1)
-        }
           this.setState({stops: stops})
           this.setState({toward: stops[stops.length-1].name})
           console.log('state of the stops is ', this.state.stops)})
@@ -177,7 +203,7 @@ class TripPlanner extends React.Component {
     
   }
 
-  getStops(lineid, transfer_station) {
+  /*getStops(lineid, transfer_station) {
     console.log('line selected is: ' + lineid);
 
     axios.get('/api/lines/' + lineid)
@@ -198,7 +224,7 @@ class TripPlanner extends React.Component {
          console.log(error);
         })
 
-  }
+  }*/
 
   componentDidMount() {
     this.getStationList();
