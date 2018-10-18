@@ -35,9 +35,10 @@ class TripPlanner extends React.Component {
      axios.get('/api/stations/')
 
       .then((response) => {
-        var stations = response.data
+        const stations = response.data
         // display stations that are marked favorite in the db first
-        this.setState({stationList: stations.sort((a, b) => b.is_favorite - a.is_favorite)})
+        const options = [{'id': 0, 'name': 'select station'}].concat(stations.sort((a, b) => b.is_favorite - a.is_favorite));
+        this.setState({stationList: options})
         
         console.log('the state is ', this.state.stationList)
       })
@@ -241,13 +242,13 @@ class TripPlanner extends React.Component {
         <div className="selections">
           Start: 
 
-          <select onChange= {this.selectStart}>{this.state.stationList.map((station) => <option value={JSON.stringify({'station': station.name, 'id': station.id})} key={station.id}>{station.name}</option>)}
+          <select onChange= {this.selectStart}>{this.state.stationList.map((station, index) => <option value={JSON.stringify({'station': station.name, 'id': station.id})} key={index}>{station.name}</option>)}
           </select>
 
           <br />
 
           End: 
-          <select onChange= {this.selectEnd}>{this.state.stationList.map((station) => <option value={JSON.stringify({'station': station.name, 'id': station.id})}key={station.id}>{station.name}</option>)}
+          <select onChange= {this.selectEnd}>{this.state.stationList.map((station, index) => <option value={JSON.stringify({'station': station.name, 'id': station.id})}key={index}>{station.name}</option>)}
           </select>
 
           <br />
