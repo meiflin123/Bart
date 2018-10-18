@@ -321,3 +321,7 @@ INSERT into stops (line_id, station_id, is_transfer) VALUES (10, 17, 0);
 INSERT into stops (line_id, station_id, is_transfer) VALUES (10, 16, 0);
 INSERT into stops (line_id, station_id, is_transfer) VALUES (10, 34, 0);
 
+UPDATE stops SET station_id = 25 WHERE id = 66;
+UPDATE stops SET station_id = 23 WHERE id = 69;
+UPDATE stops SET station_id = 23 WHERE id = 80;
+UPDATE stops SET is_transfer = 1 WHERE station_id = 25;
