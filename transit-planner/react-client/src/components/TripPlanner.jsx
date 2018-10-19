@@ -50,7 +50,6 @@ class TripPlanner extends React.Component {
 
   selectStart(event) {
     this.setState({startingStation: JSON.parse(event.target.value).station, startingStationId: JSON.parse(event.target.value).id})
-
   }
 
   selectEnd(event) {
@@ -58,12 +57,9 @@ class TripPlanner extends React.Component {
 
   }
 
-
-
   getDirection() {
     console.log('starting station is ' + this.state.startingStation + ' station_id is ' + this.state.startingStationId);
     console.log('ending station is ' + this.state.endingStation + ' station_id is ' + this.state.endingStationId)
-
 
     //fetch lines that contain the starting station
     axios.get('/api/station/' + this.state.startingStationId)
@@ -93,25 +89,26 @@ class TripPlanner extends React.Component {
                 
                 // get line id where the direaction is correct
                 this.getRoute(this.state.linesOfStartStation[i].line_id)
-    
               }
-              
-              // if no share line, compare all lines combinations and find common transfer stations
-              
-            } 
-            
-          } 
-
-        
+            }
+          }
         })
 
         this.setState({lineCombinations : lineCombinations})
         console.log('lineCombinations is ', this.state.lineCombinations)
+      }, () => {
+        // if no share line, compare all lines combinations and find common transfer stations
+        if(this.state.stops.length === 0) {
+          this.state.lineCombinations.map(x => this.transfer(x))
+        }
       })
-        .catch((error)=>{
-           console.log(error);
-         })
+
+
+      .catch((error) => {
+        console.log(error);
+      })
   }
+
 
   getRoute(lineid) {
     console.log('line selected is: ' + lineid);
