@@ -1,6 +1,7 @@
 import React from 'react';
 import $ from 'jquery';
 import axios from 'axios';
+import Transfer from './Transfer.jsx';
 
 
 class TripPlanner extends React.Component {
@@ -15,7 +16,7 @@ class TripPlanner extends React.Component {
       endingStationId: null,
       linesOfStartStation: null,
       linesOfEndingStation: null,
-      /*line_id: null,*/
+      lineCombinations: [],
       stops: [],
       toward: null
 
@@ -89,15 +90,23 @@ class TripPlanner extends React.Component {
               lineCombinations.push([this.state.linesOfStartStation[i].line_id, this.state.linesOfEndingStation[j].line_id])
               // if lines1 and lines2 have share same line
               if (this.state.linesOfStartStation[i].line_id === this.state.linesOfEndingStation[j].line_id) {
+                
                 // get line id where the direaction is correct
                 this.getRoute(this.state.linesOfStartStation[i].line_id)
     
               }
+              
+              // if no share line, compare all lines combinations and find common transfer stations
+              
             } 
-            // if no share line, compare all lines combinations and find common transfer stations
-          } return lineCombinations.map(x => this.transfer(x));
+            
+          } 
 
+        
         })
+
+        this.setState({lineCombinations : lineCombinations})
+        console.log('lineCombinations is ', this.state.lineCombinations)
       })
         .catch((error)=>{
            console.log(error);
@@ -115,7 +124,7 @@ class TripPlanner extends React.Component {
 
         // if the starting station is put before the ending station in this stops array, right direction is found.
         if(stops.indexOf(this.state.startingStation) < stops.indexOf(this.state.endingStation)) {
-          return this.getStopsNoTransfer(lineid)
+          return this.getStops(lineid)
         }
         
     
@@ -129,7 +138,7 @@ class TripPlanner extends React.Component {
 
 
   
-  getStopsNoTransfer(lineid) {
+  getStops(lineid, transferid) {
     console.log('no transfer, line id is: ' + lineid);
 
     // get all the stops along this line
@@ -147,17 +156,18 @@ class TripPlanner extends React.Component {
             startingStopIndex = i 
             console.log(this.state.startingStationId, response.data[i])
           }
-          if (response.data[i].station_id === this.state.endingStationId) {
+          if (response.data[i].station_id === this.state.endingStationId || response.data[i].station_id === transferid) {
             endingStopIndex = i 
             console.log(this.state.endingStationId, response.data[i])
           }
+
         }
-        
         
           stops = response.data.slice(startingStopIndex, endingStopIndex + 1)
           this.setState({stops: stops})
           this.setState({toward: stops[stops.length-1].name})
           console.log('state of the stops is ', this.state.stops)})
+
 
       .catch((error)=>{
          console.log(error);
@@ -170,7 +180,7 @@ class TripPlanner extends React.Component {
     var lineId2 = lines[1];
     var transferStations1 = [];
     var transferStations2 = [];
-    var transfer_station = 'station_id'
+    var transferid = 'station_id'
     var index = null;
     console.log(lineId1, lineId2)
     
@@ -191,10 +201,10 @@ class TripPlanner extends React.Component {
         for (var i = 0; i < transferStations1.length; i++) {
           for (var j = 0; j < transferStations2.length; j++) {
             if (transferStations1[i].station_id === transferStations2[j].station_id) {
-              transfer_station = transferStations1[i].station_id;
-              console.log('transferPoint is', transfer_station)
-              this.getRoute(lineId1, transfer_station)
-              // get the index of the transfer_station in the state of stops array.
+              transferid = transferStations1[i].station_id;
+              console.log('transferPoint is', transferid)
+              this.getStops(lineId1, transferid)
+              // get the index of the transferid.
             }
           }
         }
@@ -280,6 +290,9 @@ class TripPlanner extends React.Component {
               {this.state.stops.map((stop) => (<li key={stop.id}>{stop.name}</li>))}
             </ul>
           </div>
+           <div className="transfer">
+         {/* {<Transfer />}*/}
+        </div>
           <div className="directions-step">
             <div className="directions-line-header">
               <p className="line-name">Arrive at {this.state.endingStation}</p>

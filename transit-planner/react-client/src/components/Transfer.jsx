@@ -1,10 +1,23 @@
 import React from 'react';
+import $ from 'jquery';
+import axios from 'axios';
+
+class Transfer extends React.Component {
+  constructor(props) {
+    super(props);
+    console.log(this.props.lines)
+
+  }
+
+
+  render() {
+    return (
 
           <div className="directions-step">
             <div className="directions-line-header">
               <p className="line-name">Change Trains</p>
             </div>
-          </div>
+         
 
           <div className="directions-step">
             <div className="directions-line-header">
@@ -18,3 +31,10 @@ import React from 'react';
               <li> Station E </li>
             </ul>
           </div>
+           </div>
+          )
+
+  }
+}
+
+export default Transfer;
