@@ -9,7 +9,8 @@ This is a solo project I completed as a student at hackreactor. It's a full-stac
 2. A **Trip Planner** that allows the user to see a series of directions between two stations.</br>
 
 ![screen shot 2018-10-18 at 8 12 49 pm](https://user-images.githubusercontent.com/35877838/47195881-c1da9580-d312-11e8-86d3-13f488025c0f.png)
-![screen shot 2018-10-18 at 8 18 28 pm](https://user-images.githubusercontent.com/35877838/47195929-06663100-d313-11e8-9337-2284634805f8.png)
+
+![screen shot 2018-10-18 at 8 27 21 pm](https://user-images.githubusercontent.com/35877838/47196205-4974d400-d314-11e8-9b19-9f08cceea7f8.png)
 
 
 
