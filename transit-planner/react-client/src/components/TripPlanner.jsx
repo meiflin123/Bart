@@ -86,7 +86,6 @@ class TripPlanner extends React.Component {
               lineCombinations.push([this.state.linesOfStartStation[i].line_id, this.state.linesOfEndingStation[j].line_id])
               // if lines1 and lines2 have share same line
               if (this.state.linesOfStartStation[i].line_id === this.state.linesOfEndingStation[j].line_id) {
-                
                 // get line id where the direaction is correct
                 this.getRoute(this.state.linesOfStartStation[i].line_id)
               }
@@ -162,7 +161,7 @@ class TripPlanner extends React.Component {
         
           stops = response.data.slice(startingStopIndex, endingStopIndex + 1)
           this.setState({stops: stops})
-          this.setState({toward: stops[stops.length-1].name})
+          this.setState({toward: response.data[response.data.length - 1].name})
           console.log('state of the stops is ', this.state.stops)})
 
 
