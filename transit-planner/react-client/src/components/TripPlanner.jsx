@@ -95,12 +95,12 @@ class TripPlanner extends React.Component {
 
         this.setState({lineCombinations : lineCombinations})
         console.log('lineCombinations is ', this.state.lineCombinations)
-      }, () => {
+      }, setTimeout(() => {
         // if no share line, compare all lines combinations and find common transfer stations
         if(this.state.stops.length === 0) {
           this.state.lineCombinations.map(x => this.transfer(x))
         }
-      })
+      }, 2000))
 
 
       .catch((error) => {
