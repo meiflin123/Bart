@@ -32,7 +32,7 @@ getAllLines(function(err, data) {
 
 //get all stops found along a line, according to that line's `id`.
 const getStops = function(lineid, callback) {
-  var query = 'SELECT *  FROM stations, stops WHERE stops.line_id = ? AND stations.id = stops.station_id;'
+  let query = 'SELECT *  FROM stations, stops WHERE stops.line_id = ? AND stations.id = stops.station_id;'
   connection.query(query, lineid, (err, data) => {
     if (err) {
       callback(err);
@@ -51,9 +51,9 @@ const getStops = function(lineid, callback) {
 
 // toggle a station to be favorite or to be unfavorite. 
 const toggleFavStation = function(stationId, callback) {
-  var stationData = 'SELECT * FROM stations WHERE id = ?'
-  var makeFav = 'UPDATE stations SET is_favorite = 1 WHERE stations.id = ?';
-  var removeFav = 'UPDATE stations SET is_favorite = 0 WHERE stations.id = ?';
+  let stationData = 'SELECT * FROM stations WHERE id = ?'
+  let makeFav = 'UPDATE stations SET is_favorite = 1 WHERE stations.id = ?';
+  let removeFav = 'UPDATE stations SET is_favorite = 0 WHERE stations.id = ?';
 
   connection.query(stationData, stationId, (err, data) => {
     if (err) {
@@ -112,7 +112,7 @@ const getLineId = function(stationId, callback) {
 }
 
 const getTransfer = function(lineId, callback) {
-  var query = 'SELECT station_id from stops where is_transfer = 1 AND line_id = ?'
+  let query = 'SELECT station_id from stops where is_transfer = 1 AND line_id = ?'
   connection.query(query, lineId, (err, data) => {
     if (err) {
       callback(err);

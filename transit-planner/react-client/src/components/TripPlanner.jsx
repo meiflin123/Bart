@@ -77,12 +77,12 @@ class TripPlanner extends React.Component {
       .then((response) => {
         console.log('lines for ending_id:' + response.data)
         const lines2 = response.data;
-        var shareLine = null;
-        var lineCombinations = [];
+        let shareLine = null;
+        let lineCombinations = [];
         this.setState({linesOfEndingStation: lines2}, () => {
 
-          for (var i = 0; i < this.state.linesOfStartStation.length; i++) {
-            for (var j = 0; j < this.state.linesOfEndingStation.length; j++) {
+          for (let i = 0; i < this.state.linesOfStartStation.length; i++) {
+            for (let j = 0; j < this.state.linesOfEndingStation.length; j++) {
               lineCombinations.push([this.state.linesOfStartStation[i].line_id, this.state.linesOfEndingStation[j].line_id])
               // if lines1 and lines2 have share same line
               if (this.state.linesOfStartStation[i].line_id === this.state.linesOfEndingStation[j].line_id) {
@@ -141,13 +141,13 @@ class TripPlanner extends React.Component {
     axios.get('/api/lines/' + lineid)
       .then((response) => {
 
-        var startingStopIndex = null;
-        var endingStopIndex= null;
-        var stops = null
+        let startingStopIndex = null;
+        let endingStopIndex= null;
+        let stops = null
         console.log('stops fetched from this line are ', response.data )
 
       
-        for (var i = 0; i < response.data.length; i++) {
+        for (let i = 0; i < response.data.length; i++) {
           if (response.data[i].station_id === this.state.startingStationId) {
             startingStopIndex = i 
             console.log(this.state.startingStationId, response.data[i])
@@ -172,12 +172,12 @@ class TripPlanner extends React.Component {
   }
 
   transfer(lines) {
-    var lineId1 = lines[0];
-    var lineId2 = lines[1];
-    var transferStations1 = [];
-    var transferStations2 = [];
-    var transferid = 'station_id'
-    var index = null;
+    let lineId1 = lines[0];
+    let lineId2 = lines[1];
+    let transferStations1 = [];
+    let transferStations2 = [];
+    let transferid = 'station_id'
+    let index = null;
     console.log(lineId1, lineId2)
     
     // get transfer stations on lineId1
@@ -194,8 +194,8 @@ class TripPlanner extends React.Component {
       .then((response) => {
         const transferStations2 = response.data;
         console.log('transferStations on line2' + transferStations2)
-        for (var i = 0; i < transferStations1.length; i++) {
-          for (var j = 0; j < transferStations2.length; j++) {
+        for (let i = 0; i < transferStations1.length; i++) {
+          for (let j = 0; j < transferStations2.length; j++) {
             if (transferStations1[i].station_id === transferStations2[j].station_id) {
               transferid = transferStations1[i].station_id;
               console.log('transferPoint is', transferid)
@@ -218,8 +218,8 @@ class TripPlanner extends React.Component {
     axios.get('/api/lines/' + lineid)
       .then((response) => {
         const stops = response.data
-        var index = null;
-        for (var i = 0; i < stops.length; i++) {
+        let index = null;
+        for (let i = 0; i < stops.length; i++) {
           if (stops[i].station_id === transfer_station) {
             index = i;
             this.setState({stops: stops})
