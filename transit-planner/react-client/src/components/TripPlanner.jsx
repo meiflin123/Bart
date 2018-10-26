@@ -202,29 +202,6 @@ class TripPlanner extends React.Component {
     
   }
 
-  /*getRoute(lineid, transfer_station) {
-    console.log('line selected is: ' + lineid);
-
-    axios.get('/api/lines/' + lineid)
-      .then((response) => {
-        const stops = response.data
-        let index = null;
-        for (let i = 0; i < stops.length; i++) {
-          if (stops[i].station_id === transfer_station) {
-            index = i;
-            this.setState({stops: stops})
-          }
-        }
-        
-        console.log('all stops along this line:', this.state.stops)
-          })
-
-      .catch((error)=>{
-         console.log(error);
-        })
-
-  }*/
-
   componentDidMount() {
     this.getStationList();
 
