@@ -14,8 +14,8 @@ class TripPlanner extends React.Component {
       startingStationId: null,
       endingStation: 'destination',
       endingStationId: null,
-      linesOfStartStation: null,
-      linesOfEndingStation: null,
+      linesWithStartingStation: null,
+      linesWithEndingStation: null,
       lineCombinations: [],
       stops: [],
       toward: []
@@ -65,7 +65,7 @@ class TripPlanner extends React.Component {
       .then((response) => {
         console.log('possible lines with starting_id:' + JSON.stringify(response.data))
         const lines1 = response.data;
-        this.setState({linesOfStartStation: lines1})
+        this.setState({linesWithStartingStation: lines1})
       })
       .catch((error)=>{
         console.log(error);
@@ -78,29 +78,28 @@ class TripPlanner extends React.Component {
         const lines2 = response.data;
         let shareLine = null;
         let lineCombinations = [];
-        this.setState({linesOfEndingStation: lines2}, () => {
+        let transfer = true;
+        this.setState({linesWithEndingStation: lines2}, () => {
 
-          for (let i = 0; i < this.state.linesOfStartStation.length; i++) {
-            for (let j = 0; j < this.state.linesOfEndingStation.length; j++) {
-              lineCombinations.push([this.state.linesOfStartStation[i].line_id, this.state.linesOfEndingStation[j].line_id])
-              // if lines1 and lines2 have share same line
-              if (this.state.linesOfStartStation[i].line_id === this.state.linesOfEndingStation[j].line_id) {
-                // get line id where the direaction is correct
-                this.getStops(this.state.linesOfStartStation[i].line_id)
+        //compare two lines, if there's common line id, fetch and display stops along this line
+        //if no common line is found, get transfer train.
+          for (let i = 0; i < this.state.linesWithStartingStation.length; i++) {
+            for (let j = 0; j < this.state.linesWithEndingStation.length; j++) {
+              lineCombinations.push([this.state.linesWithStartingStation[i].line_id, this.state.linesWithEndingStation[j].line_id])
+
+              if (this.state.linesWithStartingStation[i].line_id === this.state.linesWithEndingStation[j].line_id) {
+                transfer = false;
+                this.getStops(this.state.linesWithStartingStation[i].line_id)
               }
             }
           }
         })
-
         this.setState({lineCombinations : lineCombinations})
         console.log('lineCombinations is ', this.state.lineCombinations)
-      }, setTimeout(() => {
-        // if no share line, compare all lines combinations and find common transfer stations
-        console.log('state of stops is ', this.state.stops)
-        if(this.state.stops.length === 0) {
+        if (transfer === true) {
           this.state.lineCombinations.map(x => this.transfer(x))
         }
-      }, 1000))
+      })
 
 
       .catch((error) => {
