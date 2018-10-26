@@ -18,7 +18,7 @@ class TripPlanner extends React.Component {
       linesOfEndingStation: null,
       lineCombinations: [],
       stops: [],
-      toward: null
+      toward: []
 
     }
 
@@ -27,8 +27,7 @@ class TripPlanner extends React.Component {
     this.selectEnd = this.selectEnd.bind(this);
     this.getDirection = this.getDirection.bind(this);
     this.transfer = this.transfer.bind(this);
-    this.getRoute = this.getRoute.bind(this);
-
+   
   }
 
 // write a function to display all stations 
@@ -41,7 +40,7 @@ class TripPlanner extends React.Component {
         const options = [{'id': 0, 'name': 'select station'}].concat(stations.sort((a, b) => b.is_favorite - a.is_favorite));
         this.setState({stationList: options})
         
-        console.log('the state is ', this.state.stationList)
+        console.log('stations list ', this.state.stationList)
       })
       .catch((error)=>{
          console.log(error);
@@ -61,10 +60,10 @@ class TripPlanner extends React.Component {
     console.log('starting station is ' + this.state.startingStation + ' station_id is ' + this.state.startingStationId);
     console.log('ending station is ' + this.state.endingStation + ' station_id is ' + this.state.endingStationId)
 
-    //fetch lines that contain the starting station
+    //fetch lines that have the starting station
     axios.get('/api/station/' + this.state.startingStationId)
       .then((response) => {
-        console.log('lines for starting_id:' + response.data)
+        console.log('possible lines with starting_id:' + JSON.stringify(response.data))
         const lines1 = response.data;
         this.setState({linesOfStartStation: lines1})
       })
@@ -72,10 +71,10 @@ class TripPlanner extends React.Component {
         console.log(error);
        })
 
-    // fetch lines that contain the ending station
+    // fetch lines that have the ending station
     axios.get('/api/station/' + this.state.endingStationId)
       .then((response) => {
-        console.log('lines for ending_id:' + response.data)
+        console.log('possible lines with ending_id:' + JSON.stringify(response.data))
         const lines2 = response.data;
         let shareLine = null;
         let lineCombinations = [];
@@ -87,7 +86,7 @@ class TripPlanner extends React.Component {
               // if lines1 and lines2 have share same line
               if (this.state.linesOfStartStation[i].line_id === this.state.linesOfEndingStation[j].line_id) {
                 // get line id where the direaction is correct
-                this.getRoute(this.state.linesOfStartStation[i].line_id)
+                this.getStops(this.state.linesOfStartStation[i].line_id)
               }
             }
           }
@@ -97,77 +96,65 @@ class TripPlanner extends React.Component {
         console.log('lineCombinations is ', this.state.lineCombinations)
       }, setTimeout(() => {
         // if no share line, compare all lines combinations and find common transfer stations
+        console.log('state of stops is ', this.state.stops)
         if(this.state.stops.length === 0) {
           this.state.lineCombinations.map(x => this.transfer(x))
         }
-      }, 2000))
+      }, 1000))
 
 
       .catch((error) => {
         console.log(error);
       })
   }
-
-
-  getRoute(lineid) {
-    console.log('line selected is: ' + lineid);
-
-    axios.get('/api/lines/' + lineid)
-      .then((response) => {
-        console.log('getRoute ' + response)
-        const stops = response.data.map(x => x.name)
-        console.log('all stops along this line:', stops);
-
-        // if the starting station is put before the ending station in this stops array, right direction is found.
-        if(stops.indexOf(this.state.startingStation) < stops.indexOf(this.state.endingStation)) {
-          return this.getStops(lineid)
-        }
-        
-    
-        })
-
-      .catch((error)=>{
-         console.log(error);
-        })
-
-  }
-
-
   
   getStops(lineid, transferid) {
-    console.log('no transfer, line id is: ' + lineid);
+    console.log('reached getStops, line id is: ' + lineid);
 
     // get all the stops along this line
     axios.get('/api/lines/' + lineid)
       .then((response) => {
 
-        let startingStopIndex = null;
-        let endingStopIndex= null;
+        let startingStopIndex = null;  
+        let endingStopIndex= null;     //index of the ending stop || shared transfer stop on the line Array
         let stops = null
-        console.log('stops fetched from this line are ', response.data )
+        console.log('stops fetched from first line ',lineid, ' is ', response.data )
 
-      
+        
         for (let i = 0; i < response.data.length; i++) {
           if (response.data[i].station_id === this.state.startingStationId) {
             startingStopIndex = i 
-            console.log(this.state.startingStationId, response.data[i])
+            console.log('starting station id is ', this.state.startingStationId, response.data[i])
           }
           if (response.data[i].station_id === this.state.endingStationId || response.data[i].station_id === transferid) {
             endingStopIndex = i 
-            console.log(this.state.endingStationId, response.data[i])
-          }
+            console.log('ending station id is ', this.state.endingStationId, response.data[i])
 
+            // if starting stop index and the direction of the route is correct, set towards and display stops
+            if(startingStopIndex!== null && startingStopIndex < endingStopIndex) {
+
+              let destination = response.data[response.data.length -1].name
+              if (!this.state.toward.includes(destination)) {
+                this.state.toward.push(destination)
+
+              }
+              console.log('toward ', this.state.toward)
+              stops = response.data.slice(startingStopIndex, endingStopIndex + 1);
+              this.setState({stops: stops});
+              console.log('state of the stops is ', this.state.stops);
+              return;
+
+            }
+          }
+          
         }
-        
-          stops = response.data.slice(startingStopIndex, endingStopIndex + 1)
-          this.setState({stops: stops})
-          this.setState({toward: response.data[response.data.length - 1].name})
-          console.log('state of the stops is ', this.state.stops)})
+          
+      })
 
 
       .catch((error)=>{
          console.log(error);
-        })
+      })
 
   }
 
@@ -180,28 +167,32 @@ class TripPlanner extends React.Component {
     let index = null;
     console.log(lineId1, lineId2)
     
-    // get transfer stations on lineId1
+    // fetch transfer stations list from first line
     axios.get('/api/transfer/' + lineId1)
       .then((response) => {
         transferStations1 = response.data;
-        console.log('transferStations on line1' + transferStations1)
+        console.log('transferStations on lineid ',lineId1,' are ', JSON.stringify(transferStations1))
       })
       .catch((error)=>{
          console.log(error);
        })
 
+    //fetch transfer stations list from second line
     axios.get('/api/transfer/' + lineId2)
       .then((response) => {
         const transferStations2 = response.data;
-        console.log('transferStations on line2' + transferStations2)
+        console.log('transferStations on lineid ', lineId2, ' are ', JSON.stringify(transferStations2))
+
+        // if first line and second line share same transfer station, display stops start from starting station to transfer station on line1.
         for (let i = 0; i < transferStations1.length; i++) {
           for (let j = 0; j < transferStations2.length; j++) {
+
             if (transferStations1[i].station_id === transferStations2[j].station_id) {
               transferid = transferStations1[i].station_id;
-              console.log('transferPoint is', transferid)
+              console.log('shared transferstation id is', transferid, 'lineId1 is ', lineId1)
               this.getStops(lineId1, transferid)
-              // get the index of the transferid.
             }
+
           }
         }
       })
