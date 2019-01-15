@@ -2,6 +2,7 @@ import React from 'react';
 import $ from 'jquery';
 import axios from 'axios';
 import StopsList from  './StopsList.jsx';
+import TripPlanner from './TripPlanner.jsx';
 
 
 class Lines extends React.Component {
@@ -61,6 +62,7 @@ class Lines extends React.Component {
   componentDidMount (){
     this.getAllLines();
     this.getStops(1)
+
   }
   render () {
     return (

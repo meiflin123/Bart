@@ -2,6 +2,7 @@ import React from 'react';
 import $ from 'jquery';
 import axios from 'axios';
 import Transfer from './Transfer.jsx';
+import Lines from './Lines.jsx'
 
 
 class TripPlanner extends React.Component {
@@ -27,6 +28,7 @@ class TripPlanner extends React.Component {
     this.selectEnd = this.selectEnd.bind(this);
     this.getDirection = this.getDirection.bind(this);
     this.transfer = this.transfer.bind(this);
+
    
   }
 
@@ -129,9 +131,11 @@ class TripPlanner extends React.Component {
             endingStopIndex = i 
             console.log('ending station id is ', this.state.endingStationId, response.data[i])
 
-            // if starting stop index and the direction of the route is correct, set towards and display stops
+            // if starting stop index exists AND the correct direction of the route, 
+            // set towards and display stops
             if(startingStopIndex!== null && startingStopIndex < endingStopIndex) {
-
+              /*let trainColor = this.props.getAllLines();*/
+              console.log(this.props.getAllLines)
               let destination = response.data[response.data.length -1].name
               if (!this.state.toward.includes(destination)) {
                 this.state.toward.push(destination)
@@ -156,6 +160,7 @@ class TripPlanner extends React.Component {
       })
 
   }
+
 
   transfer(lines) {
     let lineId1 = lines[0];
@@ -205,7 +210,6 @@ class TripPlanner extends React.Component {
   componentDidMount() {
     this.getStationList();
 
-    
   }
 
 
