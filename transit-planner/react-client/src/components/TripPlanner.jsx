@@ -20,8 +20,9 @@ class TripPlanner extends React.Component {
       lineCombinations: [],
       stops: [],
       toward: [],
-      lineColor: null,
-      lineColorWord: null
+      lineCircle: null,
+      lineColors: [],
+      lineColorsStr: ''
 
     }
 
@@ -116,7 +117,13 @@ class TripPlanner extends React.Component {
   getLineColor(lineid){
     let color = [null, 'Red', 'Red','Yellow', 'Yellow','Blue', 'Blue', 'Green','Green', 'Orange','Orange']
     let lineColor = color[lineid]
-    this.setState({lineColorWord: lineColor})
+    let lineColorsStr = ''
+    if (!this.state.lineColors.includes(lineColor)) {
+      this.state.lineColors.push(lineColor)
+      lineColorsStr = this.state.lineColors.join(', ')
+      this.setState({lineColorsStr: lineColorsStr})
+    }
+
 
 
     console.log('lineid for color is ', lineid)
@@ -273,7 +280,7 @@ class TripPlanner extends React.Component {
           <div className="directions-step">
             <div className="directions-line-header">
               <div className="line-circle" style={{backgroundColor: this.state.lineColor}}></div>
-              <p className="line-name">{this.state.lineColorWord} Line</p>
+              <p className="line-name">{this.state.lineColorsStr} Line</p>
               <p className="line-direction">towards {this.state.toward}</p>
             </div>
             <ul>
