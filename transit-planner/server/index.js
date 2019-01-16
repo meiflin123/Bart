@@ -6,6 +6,7 @@ const toggleFavStation = require('../database-mysql/index.js').toggleFavStation;
 const getStations = require('../database-mysql/index.js').getStations;
 const getLineId = require('../database-mysql/index.js').getLineId;
 const getTransfer = require('../database-mysql/index.js').getTransfer;
+const getLineColor = require('../database-mysql/index.js').getLineColor;
 
 const db = require('../database-mysql');
 
@@ -96,6 +97,18 @@ app.get('/api/station/:stationId', (req, res) => {
 app.get('/api/transfer/:lineId', (req, res) => {
   const lineId = req.params.lineId;
   getTransfer(lineId, (err, data) => {
+    if (err) {
+      res.sendStatus(500).send(err)
+      return;
+    }
+    res.json(data);
+  })
+})
+
+//get line color 
+app.get('/api/linecolor/:lineId', (req, res) => {
+  const lineId = req.params.lineId;
+  getLineColor(lineId, (err, data) => {
     if (err) {
       res.sendStatus(500).send(err)
       return;

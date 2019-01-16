@@ -19,7 +19,9 @@ class TripPlanner extends React.Component {
       linesWithEndingStation: null,
       lineCombinations: [],
       stops: [],
-      toward: []
+      toward: [],
+      lineColor: null,
+      lineColorWord: null
 
     }
 
@@ -28,6 +30,7 @@ class TripPlanner extends React.Component {
     this.selectEnd = this.selectEnd.bind(this);
     this.getDirection = this.getDirection.bind(this);
     this.transfer = this.transfer.bind(this);
+    this.getLineColor= this.getLineColor.bind(this);
 
    
   }
@@ -92,6 +95,7 @@ class TripPlanner extends React.Component {
               if (this.state.linesWithStartingStation[i].line_id === this.state.linesWithEndingStation[j].line_id) {
                 transfer = false;
                 this.getStops(this.state.linesWithStartingStation[i].line_id)
+                this.getLineColor(this.state.linesWithStartingStation[i].line_id)
               }
             }
           }
@@ -107,6 +111,25 @@ class TripPlanner extends React.Component {
       .catch((error) => {
         console.log(error);
       })
+  }
+
+  getLineColor(lineid){
+    let color = [null, 'Red', 'Red','Yellow', 'Yellow','Blue', 'Blue', 'Green','Green', 'Orange','Orange']
+    let lineColor = color[lineid]
+    this.setState({lineColorWord: lineColor})
+
+
+    console.log('lineid for color is ', lineid)
+    axios.get('/api/lineColor/'+ lineid)
+    .then((response) => {
+      console.log(response.data[0].color)
+      this.setState({lineColor: '#' + response.data[0].color})
+
+    })
+    console.log('state of color is ' + this.state.lineColor)
+    console.log('state of color word is ' + this.state.lineColorWord)
+
+
   }
   
   getStops(lineid, transferid) {
@@ -249,8 +272,8 @@ class TripPlanner extends React.Component {
 
           <div className="directions-step">
             <div className="directions-line-header">
-              <div className="line-circle" style={{backgroundColor: "#ed1d24"}}></div>
-              <p className="line-name">Red Line</p>
+              <div className="line-circle" style={{backgroundColor: this.state.lineColor}}></div>
+              <p className="line-name">{this.state.lineColorWord} Line</p>
               <p className="line-direction">towards {this.state.toward}</p>
             </div>
             <ul>
