@@ -20,7 +20,7 @@ class TripPlanner extends React.Component {
       lineCombinations: [],
       stops: [],
       toward: [],
-      lineCircle: null,
+      circleColors: [],
       lineColors: [],
       lineColorsStr: ''
 
@@ -118,6 +118,7 @@ class TripPlanner extends React.Component {
     let color = [null, 'Red', 'Red','Yellow', 'Yellow','Blue', 'Blue', 'Green','Green', 'Orange','Orange']
     let lineColor = color[lineid]
     let lineColorsStr = ''
+    let colorCircle = ''
     if (!this.state.lineColors.includes(lineColor)) {
       this.state.lineColors.push(lineColor)
       lineColorsStr = this.state.lineColors.join(', ')
@@ -130,13 +131,12 @@ class TripPlanner extends React.Component {
     axios.get('/api/lineColor/'+ lineid)
     .then((response) => {
       console.log(response.data[0].color)
-      this.setState({lineColor: '#' + response.data[0].color})
-
+      colorCircle = '#' + response.data[0].color
+      console.log('colorCircle is ' + this.state.circleColors)
+      if (!this.state.circleColors.includes(colorCircle)) {
+        this.state.circleColors.push(colorCircle)
+      }
     })
-    console.log('state of color is ' + this.state.lineColor)
-    console.log('state of color word is ' + this.state.lineColorWord)
-
-
   }
   
   getStops(lineid, transferid) {
@@ -279,7 +279,7 @@ class TripPlanner extends React.Component {
 
           <div className="directions-step">
             <div className="directions-line-header">
-              <div className="line-circle" style={{backgroundColor: this.state.lineColor}}></div>
+            {this.state.circleColors.map((circle) => ( <div className="line-circle" style={{backgroundColor: circle}}></div>))}
               <p className="line-name">{this.state.lineColorsStr} Line</p>
               <p className="line-direction">towards {this.state.toward}</p>
             </div>
