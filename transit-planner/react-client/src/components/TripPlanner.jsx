@@ -22,7 +22,7 @@ class TripPlanner extends React.Component {
       toward: [],
       circleColors: [],
       lineList: [],
-      lineColorText: ''
+      lineName: ''
 
     }
 
@@ -119,13 +119,13 @@ class TripPlanner extends React.Component {
     //display available options of routes between two stations user selected. 
     let linesColors = [null, 'Red', 'Red','Yellow', 'Yellow','Blue', 'Blue', 'Green','Green', 'Orange','Orange']
     let selectLine = linesColors[lineid]
-    let lineColorText = ''
+    let lineName = ''
     let colorCircle = ''
     if (!this.state.lineList.includes(selectLine)) {
       this.state.lineList.push(selectLine)
     }
-    lineColorText = this.state.lineList.join(', ')
-    this.setState({lineColorText: lineColorText})
+    lineName = this.state.lineList.join(', ')
+    this.setState({lineName: lineName})
 
     console.log('lineid for color is ', lineid)
     axios.get('/api/lineColor/'+ lineid)
@@ -285,7 +285,7 @@ class TripPlanner extends React.Component {
             <div className="directions-line-header">
           
            {this.state.circleColors.map((circle) => (<div className="line-circle" style={{backgroundColor: circle}}></div>))}
-              <p className="line-name">{this.state.lineColorText} Line</p>
+              <p className="line-name">{this.state.lineName} Line</p>
               <p className="line-direction">towards {this.state.toward}</p>
             </div>
             <ul>
