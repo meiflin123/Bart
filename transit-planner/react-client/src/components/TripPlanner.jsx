@@ -21,8 +21,8 @@ class TripPlanner extends React.Component {
       stops: [],
       toward: [],
       circleColors: [],
-      lineColors: [],
-      lineColorsStr: ''
+      lineList: [],
+      lineColorText: ''
 
     }
 
@@ -95,8 +95,9 @@ class TripPlanner extends React.Component {
 
               if (this.state.linesWithStartingStation[i].line_id === this.state.linesWithEndingStation[j].line_id) {
                 transfer = false;
-                this.getStops(this.state.linesWithStartingStation[i].line_id)
                 this.getLineColor(this.state.linesWithStartingStation[i].line_id)
+                this.getStops(this.state.linesWithStartingStation[i].line_id)
+                
               }
             }
           }
@@ -115,17 +116,16 @@ class TripPlanner extends React.Component {
   }
 
   getLineColor(lineid){
-    let color = [null, 'Red', 'Red','Yellow', 'Yellow','Blue', 'Blue', 'Green','Green', 'Orange','Orange']
-    let lineColor = color[lineid]
-    let lineColorsStr = ''
+    //display available options of routes between two stations user selected. 
+    let linesColors = [null, 'Red', 'Red','Yellow', 'Yellow','Blue', 'Blue', 'Green','Green', 'Orange','Orange']
+    let selectLine = linesColors[lineid]
+    let lineColorText = ''
     let colorCircle = ''
-    if (!this.state.lineColors.includes(lineColor)) {
-      this.state.lineColors.push(lineColor)
-      lineColorsStr = this.state.lineColors.join(', ')
-      this.setState({lineColorsStr: lineColorsStr})
+    if (!this.state.lineList.includes(selectLine)) {
+      this.state.lineList.push(selectLine)
     }
-
-
+    lineColorText = this.state.lineList.join(', ')
+    this.setState({lineColorText: lineColorText})
 
     console.log('lineid for color is ', lineid)
     axios.get('/api/lineColor/'+ lineid)
@@ -137,6 +137,9 @@ class TripPlanner extends React.Component {
         this.state.circleColors.push(colorCircle)
       }
     })
+    .catch((error)=>{
+       console.log(error);
+     })
   }
   
   getStops(lineid, transferid) {
@@ -240,6 +243,7 @@ class TripPlanner extends React.Component {
   componentDidMount() {
     this.getStationList();
 
+
   }
 
 
@@ -279,8 +283,9 @@ class TripPlanner extends React.Component {
 
           <div className="directions-step">
             <div className="directions-line-header">
-            {this.state.circleColors.map((circle) => ( <div className="line-circle" style={{backgroundColor: circle}}></div>))}
-              <p className="line-name">{this.state.lineColorsStr} Line</p>
+          
+           {this.state.circleColors.map((circle) => (<div className="line-circle" style={{backgroundColor: circle}}></div>))}
+              <p className="line-name">{this.state.lineColorText} Line</p>
               <p className="line-direction">towards {this.state.toward}</p>
             </div>
             <ul>
