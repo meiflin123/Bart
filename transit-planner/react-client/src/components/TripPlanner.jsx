@@ -63,6 +63,8 @@ class TripPlanner extends React.Component {
   }
 
   getDirection() {
+    this.setState({circleColors: []})
+    this.setState({lineList: []})
     console.log('starting station is ' + this.state.startingStation + ' station_id is ' + this.state.startingStationId);
     console.log('ending station is ' + this.state.endingStation + ' station_id is ' + this.state.endingStationId)
 
@@ -128,6 +130,7 @@ class TripPlanner extends React.Component {
     this.setState({lineName: lineName})
 
     console.log('lineid for color is ', lineid)
+
     axios.get('/api/lineColor/'+ lineid)
     .then((response) => {
       console.log(response.data[0].color)
