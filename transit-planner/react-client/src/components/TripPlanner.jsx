@@ -146,6 +146,7 @@ class TripPlanner extends React.Component {
   }
   
   getStops(lineid, transferid) {
+    this.setState({toward: []})
     console.log('reached getStops, line id is: ' + lineid);
 
     // get all the stops along this line
