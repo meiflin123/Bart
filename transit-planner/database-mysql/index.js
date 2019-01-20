@@ -111,18 +111,6 @@ const getLineId = function(stationId, callback) {
   })
 }
 
-const getLineColor = function(lineId, callback) {
-  var query = 'SELECT color FROM service_lines where id = ?'
-  connection.query(query, lineId, (err, data) => {
-    if (err) {
-      callback(err);
-      return;
-    }
-    callback(null, data)
-    console.log('database: line color is ', data)
-  })
-}
-
 const getTransfer = function(lineId, callback) {
   let query = 'SELECT station_id from stops where is_transfer = 1 AND line_id = ?'
   connection.query(query, lineId, (err, data) => {
@@ -142,5 +130,4 @@ module.exports = {
   getStations,
   getLineId,
   getTransfer,
-  getLineColor
 };
