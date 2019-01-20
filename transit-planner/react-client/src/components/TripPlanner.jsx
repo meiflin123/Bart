@@ -4,7 +4,13 @@ import axios from 'axios';
 import Transfer from './Transfer.jsx';
 import Lines from './Lines.jsx';
 
-
+let lines = {
+      '1 and 2' :['Red', '#e11a57'], 
+      '3 and 4' :['Yellow', '#fdf057'],
+      '5 and 6' :['Blue', '#2aabe2'],
+      '7 and 8' :['Green', '#4fb848'],
+      '9 and 10' :['Orange','#f9a11d']
+};
 class TripPlanner extends React.Component {
   constructor(props) {
     super(props);
@@ -22,7 +28,8 @@ class TripPlanner extends React.Component {
       toward: [],
       circleColors: [],
       lineList: [],
-      lineName: ''
+      lineName: '',
+      lines: []
 
     }
 
@@ -119,14 +126,12 @@ class TripPlanner extends React.Component {
       })
   }
 
+
   getLineColor(lineid){
+    console.log('reached getLineColor, lineid is ', lineid)
     //display available options of routes between two stations user selected. 
-    let lines = {
-      '1 and 2' :['Red', '#e11a57'], 
-      '3 and 4' :['Yellow', '#fdf057'],
-      '5 and 6' :['Blue', '#2aabe2'],
-      '7 and 8' :['Green', '#4fb848']
-    };
+    
+
     for (var x in lines) {
       if (x.includes(lineid)) {
         this.state.circleColors.push(lines[x][1]);
@@ -134,15 +139,15 @@ class TripPlanner extends React.Component {
         let circleColors = this.state.circleColors;
         let lineName = this.state.lineList.join(', ')
         this.setState({circleColors: circleColors, lineName: lineName})
-
+        console.log('circle is ', this.state.circleColors, ' line is ', this.state.lineName)
       }
     }
   }
   
   getStops(lineid, transferid) {
     this.setState({toward: []})
-    console.log('reached getStops, line id is: ' + lineid);
-    console.log('starting station id is ' + this.state.startingStationId + ' ending station id is ' + this.state.endingStationId )
+    console.log('reached getStops, common line id is: ' + lineid);
+    
 
     // get all the stops along a line
     axios.get('/api/lines/' + lineid)
@@ -178,6 +183,8 @@ class TripPlanner extends React.Component {
           if(startingStopIndex!== null && startingStopIndex < endingStopIndex) {
             console.log('start and end, right direction', lineid)
             let destination = response.data[response.data.length -1].name
+  
+          
 
             if (!this.state.toward.includes(destination)) {
               this.state.toward.push(destination)
@@ -185,14 +192,17 @@ class TripPlanner extends React.Component {
             console.log('toward ', this.state.toward, lineid)
             
             stops = response.data.slice(startingStopIndex, endingStopIndex + 1);
+            
             this.setState({stops: stops})
             this.getLineColor(lineid)
+            
             
             console.log('state of the stops is ', this.state.stops);
 
             return;
 
           }
+             
 
       })
 
@@ -253,10 +263,8 @@ class TripPlanner extends React.Component {
 
   componentDidMount() {
     this.getStationList();
+
   }
-
-
-
 
   render() {
     return (
