@@ -12,53 +12,43 @@ class Lines extends React.Component {
     this.state = {
       lines: [],
       stops: []
-    }
-    this.getAllLines = this.getAllLines.bind(this);
+    };
     this.selectLine = this.selectLine.bind(this);
-    this.getStops = this.getStops.bind(this);
-  }
+  };
 
-
-  
-  
   getAllLines() {
     axios.get('/api/lines')
       .then(
         (response) => {
-        var lines = response.data
-        this.setState({lines : lines});
-        
+        this.setState({lines : response.data});     
         
       })
       .catch((error) => {
-        console.log(error)
+        console.log(error);
       })
-
   };
   
 
-  selectLine (event) {
-  //console.log(event.target.value);
-
-    this.getStops(event.target.value)
-
- }
+  selectLine(e) {
+    this.getStops(e.target.value);
+ };
 
   getStops(lineid) {
     console.log('line selected is: ' + lineid);
 
     axios.get('/api/lines/' + lineid)
-      .then((response) => {
-        const stops = response.data
+      .then(response => {
+        const stops = response.data;
         this.setState({stops: stops})
-        console.log('all stops along this line:', this.state.stops)
-          })
+        console.log('all stops along this line:', this.state.stops);
+      })
 
-      .catch((error)=>{
-         console.log(error);
-        })
+      .catch(error => {
+        console.log(error);
+      });
 
-  }
+  };
+
   componentDidMount (){
     this.getAllLines();
     this.getStops(1)
@@ -70,13 +60,13 @@ class Lines extends React.Component {
         <div className="selections">
           Choose a line:
          
-         <select onChange= {this.selectLine}>{this.state.lines.map((line) => (<option value={line.id} key={line.id}>{line.name}</option>))}
+         <select onChange= { this.selectLine }>{ this.state.lines.map(line => <option value={line.id} key={line.id}>{ line.name }</option>)}
             
           </select>
 
         </div>
         <div className="lines-stop-list">
-          {<StopsList stopsList={this.state.stops}/>}
+          {<StopsList stopsList={ this.state.stops }/>}
         </div>
       </div>
     );

@@ -102,8 +102,9 @@ INSERT into service_lines (name, color, origin_id, destination_id) VALUES ("Blue
 INSERT into service_lines (name, color, origin_id, destination_id) VALUES ("Blue: towards Dublin/Pleasanton", "2aabe2", 13, 15);
 INSERT into service_lines (name, color, origin_id, destination_id) VALUES ("Green: towards Warm Springs", "4fb848", 13, 43);
 INSERT into service_lines (name, color, origin_id, destination_id) VALUES ("Green: towards Daly City", "4fb848", 43, 13);
-INSERT into service_lines (name, color, origin_id, destination_id) VALUES ("Orange: towards Richmond", "f9a11d", 43, 34);
 INSERT into service_lines (name, color, origin_id, destination_id) VALUES ("Orange: towards Warm Springs", "f9a11d", 34, 43);
+INSERT into service_lines (name, color, origin_id, destination_id) VALUES ("Orange: towards Richmond", "f9a11d", 43, 34);
+
 
 -- stops
 INSERT into stops (line_id, station_id, is_transfer) VALUES (1, 26, 0);
