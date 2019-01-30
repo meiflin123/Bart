@@ -1,9 +1,6 @@
 import React from 'react';
-import $ from 'jquery';
 import axios from 'axios';
 import StopsList from  './StopsList.jsx';
-import TripPlanner from './TripPlanner.jsx';
-
 
 class Lines extends React.Component {
   constructor(props) {
@@ -33,10 +30,10 @@ class Lines extends React.Component {
     this.getStops(e.target.value);
  };
 
-  getStops(lineid) {
-    console.log('line selected is: ' + lineid);
+  getStops(lineId) {
+    console.log('line selected is: ' + lineId);
 
-    axios.get('/api/lines/' + lineid)
+    axios.get('/api/lines/' + lineId)
       .then(response => {
         const stops = response.data;
         this.setState({stops: stops})

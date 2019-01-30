@@ -1,5 +1,4 @@
 import React from 'react';
-import $ from 'jquery';
 import axios from 'axios';
 import Transfer from './Transfer.jsx';
 import Lines from './Lines.jsx';
@@ -11,16 +10,17 @@ let lines = {
       '7 and 8' :['Green', '#4fb848'],
       '9 and 10' :['Orange','#f9a11d']
 };
+
 class TripPlanner extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      stationList: [],
-      startingStation: 'Starting point',
-      startingStationId: null,
-      endingStation: 'destination',
-      endingStationId: null,
+      stationList: [{'id': 0, 'name': 'select station'}],
+      startStation: '',
+      startStationId: null,
+      endStation: '',
+      endStationId: null,
       linesWithStartingStation: null,
       linesWithEndingStation: null,
       lineCombinations: [],
@@ -33,7 +33,7 @@ class TripPlanner extends React.Component {
 
     }
 
-    this.getStationList = this.getStationList.bind(this);
+    this.displayStationList = this.displayStationList.bind(this);
     this.selectStart = this.selectStart.bind(this);
     this.selectEnd = this.selectEnd.bind(this);
     this.getDirection = this.getDirection.bind(this);
@@ -43,40 +43,41 @@ class TripPlanner extends React.Component {
    
   }
 
-// write a function to display all stations 
-  getStationList() {
+// display all stations and those favorite ones would be on top of the list.
+  displayStationList() {
      axios.get('/api/stations/')
 
       .then((response) => {
         const stations = response.data
-        // display stations that are marked favorite in the db first
-        const options = [{'id': 0, 'name': 'select station'}].concat(stations.sort((a, b) => b.is_favorite - a.is_favorite));
-        this.setState({stationList: options})
-        
-        console.log('stations list ', this.state.stationList)
+        const FavToUnfavStations = stations.sort((a, b) => b.is_favorite - a.is_favorite);
+        this.setState({stationList: this.state.stationList.concat(FavToUnfavStations)})
+    
       })
+
       .catch((error)=>{
          console.log(error);
        })
   }
 
-  selectStart(event) {
-    this.setState({startingStation: JSON.parse(event.target.value).station, startingStationId: JSON.parse(event.target.value).id})
-  }
+  // get user selected station'names and station id.
 
-  selectEnd(event) {
-    this.setState({endingStation: JSON.parse(event.target.value).station, endingStationId:JSON.parse(event.target.value).id})
+  selectStart(e) {
+    this.setState({startStation: JSON.parse(e.target.value).station, startStationId: JSON.parse(e.target.value).id});
+  };
 
-  }
+  selectEnd(e) {
+    this.setState({endStation: JSON.parse(e.target.value).station, endStationId:JSON.parse(e.target.value).id});
+
+  };
 
   getDirection() {
     this.setState({circleColors: []})
     this.setState({lineList: []})
-    console.log('starting station is ' + this.state.startingStation + ' station_id is ' + this.state.startingStationId);
-    console.log('ending station is ' + this.state.endingStation + ' station_id is ' + this.state.endingStationId)
+    console.log('starting station is ' + this.state.startStation + ' station_id is ' + this.state.startStationId);
+    console.log('ending station is ' + this.state.endStation + ' station_id is ' + this.state.endStationId)
 
     //fetch lines that have the starting station
-    axios.get('/api/station/' + this.state.startingStationId)
+    axios.get('/api/station/' + this.state.startStationId)
       .then((response) => {
         console.log('possible lines with starting_id:' + JSON.stringify(response.data))
         const lines1 = response.data;
@@ -87,7 +88,7 @@ class TripPlanner extends React.Component {
        })
 
     // fetch lines that have the ending station
-    axios.get('/api/station/' + this.state.endingStationId)
+    axios.get('/api/station/' + this.state.endStationId)
       .then((response) => {
         console.log('possible lines with ending_id:' + JSON.stringify(response.data))
         const lines2 = response.data;
@@ -160,19 +161,19 @@ class TripPlanner extends React.Component {
 
         for (let i = 0; i < response.data.length; i++) {
           // if a station id of a line matches the starting station id, set index. 
-          if (response.data[i].station_id === this.state.startingStationId) {
+          if (response.data[i].station_id === this.state.startStationId) {
             startingStopIndex = i;
             console.log('found start' + JSON.stringify(response.data[i]))
           }
           // if the last station of a line matches the ending station id, set index. 
 
-          if (response.data[response.data.length -1].station_id === this.state.endingStationId && response.data[i].station_id === transferid) {
+          if (response.data[response.data.length -1].station_id === this.state.endStationId && response.data[i].station_id === transferid) {
             endingStopIndex = i;
-            console.log('ending station id is ', this.state.endingStationId, response.data[i])
+            console.log('ending station id is ', this.state.endStationId, response.data[i])
 
           }
 
-          if (response.data[i].station_id === this.state.endingStationId) {
+          if (response.data[i].station_id === this.state.endStationId) {
             endingStopIndex = i;
             console.log('found end' + JSON.stringify(response.data[i]))
           }}
@@ -262,7 +263,7 @@ class TripPlanner extends React.Component {
   }
 
   componentDidMount() {
-    this.getStationList();
+    this.displayStationList();
 
   }
 
@@ -278,7 +279,7 @@ class TripPlanner extends React.Component {
           <br />
 
           End: 
-          <select onChange= {this.selectEnd}>{this.state.stationList.map((station, index) => <option value={JSON.stringify({'station': station.name, 'id': station.id})}key={index}>{station.name}</option>)}
+          <select onChange= {this.selectEnd}>{this.state.stationList.map((station, index) => <option value={JSON.stringify({'station': station.name, 'id': station.id})} key={index}>{station.name}</option>)}
           </select>
 
           <br />
@@ -288,12 +289,12 @@ class TripPlanner extends React.Component {
 
         <div className="directions">
           <div className="directions-summary">
-            <p className="line-name">{this.state.startingStation} to {this.state.endingStation}</p>
+            <p className="line-name">{this.state.startStation} to {this.state.endStation}</p>
             <p>31 minutes (arrive at 5:51pm)</p>
           </div>
           <div className="directions-step">
             <div className="directions-line-header">
-              <p className="line-name">Start at {this.state.startingStation}</p>
+              <p className="line-name">Start at {this.state.startStation}</p>
             </div>
           </div>
           <div className="directions-step">
@@ -314,7 +315,7 @@ class TripPlanner extends React.Component {
         </div>
           <div className="directions-step">
             <div className="directions-line-header">
-              <p className="line-name">Arrive at {this.state.endingStation}</p>
+              <p className="line-name">Arrive at {this.state.endStation}</p>
             </div>
           </div>
         </div>

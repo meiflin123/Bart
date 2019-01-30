@@ -11,7 +11,8 @@ connection.connect((err) => {
 	console.log('connected to mysql!')
 })
 
-//retrieve all lines from the `service_lines` table in the database.
+//retrieve all lines from table `service_lines` in the database.
+
 const getAllLines = function(callback) {
   connection.query('SELECT * FROM service_lines', (err, data) => {
   	if (err) {
@@ -20,17 +21,10 @@ const getAllLines = function(callback) {
   	}
   	callback(null, data);
   });
- 
-
 }
 
-/* test getALLLines function.
-getAllLines(function(err, data) {
-	console.log(data);
-})
-*/
-
 //get all stops found along a line, according to that line's `id`.
+
 const getStops = function(lineid, callback) {
   let query = 'SELECT *  FROM stations, stops WHERE stops.line_id = ? AND stations.id = stops.station_id;'
   connection.query(query, lineid, (err, data) => {
@@ -38,18 +32,15 @@ const getStops = function(lineid, callback) {
       callback(err);
       return;
     }
-    callback(null, data)
-    console.log('database: getStops', data)
+    callback(null, data);
   })
 }
 
-//test getStops
-/*getStops(1, function(err, data) {
-  console.log(data);
-})*/
-
 
 // toggle a station to be favorite or to be unfavorite. 
+  //if a station's is_favorite is 0, make it 1 and send true to server.(makefav)
+  //if a station's is_favorite is 1, make it 0 and send false to server. (removefav)
+
 const toggleFavStation = function(stationId, callback) {
   let stationData = 'SELECT * FROM stations WHERE id = ?'
   let makeFav = 'UPDATE stations SET is_favorite = 1 WHERE stations.id = ?';
@@ -60,10 +51,8 @@ const toggleFavStation = function(stationId, callback) {
       callback(err);
       return;
     }
-    console.log('station data from database is', data, typeof data, data[0].id, data[0].is_favorite === 0)
   
     if(data[0].is_favorite === 0) {
-  
       connection.query(makeFav, stationId, (err, data) => {
         if (err) {
           callback(err);
@@ -72,7 +61,6 @@ const toggleFavStation = function(stationId, callback) {
         callback(null, true)
       })
     }
-
 
     if (data[0].is_favorite === 1) {
       connection.query(removeFav, stationId, (err, data) => {
@@ -88,7 +76,6 @@ const toggleFavStation = function(stationId, callback) {
 
 // gets all stations 
 const getStations = function(callback) {
-
   connection.query('SELECT * FROM stations', (err, data) => {
     if (err) {
       callback(err);

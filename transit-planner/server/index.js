@@ -19,51 +19,47 @@ app.use(bodyParser.urlencoded({extended: true}));
  app.use(express.static(__dirname + '/../react-client/dist'));
 
 
-// get all lines
+// display all lines
 
 app.get('/api/lines', (req, res) => {
+
   getAllLines((err, data) => {
   	if (err) {
-  		res.sendStatus(500).send(err)
+  		res.sendStatus(500).send(err);
   		return;
-  	}
-  	console.log('server retrieve data:',  data);
-
-  	res.json((data));
-  })
+  	};
+  	res.json(data);
+  });
 
 });
 
-// get user selected line's all stops 
-app.get('/api/lines/:lineid', (req,res) => {
-  //console.log(req.params.lineid)
-  const lineid = req.params.lineid;
-  getStops(lineid, (err, data) => {
+// display all stops of the line user selects
+
+app.get('/api/lines/:lineId', (req,res) => {
+
+  const lineId = req.params.lineId;
+  getStops(lineId, (err, data) => {
     if (err) {
-      res.sendStatus(500).send(err)
+      res.sendStatus(500).send(err);
       return;
-    }
+    };
     res.json(data);
-  })
+  });
   
-})
+});
 
-//toggle station to be favorite or unfavorite
+//toggle station to be favorite or unfavorite;
+
 app.post('/api/toggleFavStation/:stationId', (req, res) => {
-  const stationId = req.params.stationId;
 
- 
+  const stationId = req.params.stationId;
   toggleFavStation(stationId, (err, data) => {
     if(err) {
-      return res.status(500).send(err);
-    }
-
+      res.status(500).send(err);
+      return;
+    };
     res.json(data);
-
-
-  })
-
-
+  });
 })
 
 // get all stations 
