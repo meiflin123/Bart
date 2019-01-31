@@ -108,8 +108,20 @@ const getTransfer = function(lineId, callback) {
     callback(null, data)
     console.log('database: transfer station on this line', data)
   })
-
 }
+
+const getLineColor = function(lineId, callback) {
+  var query = 'SELECT color, name FROM service_lines where id = ?'
+  connection.query(query, lineId, (err, data) => {
+    if (err) {
+      callback(err);
+      return;
+    }
+    callback(null, data)
+    console.log('database: line color is ', data)
+  })
+}
+
 module.exports = {
   getAllLines,
   getStops,
@@ -117,4 +129,5 @@ module.exports = {
   getStations,
   getLineId,
   getTransfer,
+  getLineColor
 };

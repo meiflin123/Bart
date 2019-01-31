@@ -27,7 +27,7 @@ class TripPlanner extends React.Component {
       lineCombinations: [],
       stops: [],
       toward: [],
-      circleColors: [],
+      circles: [],
       lineNames: '',
       lines: []
 
@@ -211,16 +211,20 @@ class TripPlanner extends React.Component {
   }
 
 
-  getLineColor(lineList){
+  async getLineColor(lineList){
+
+    let circles = [];
+    let name = [];
+    let nameList= [];
+
    // if a line id appears inside of the object lineColor
      // push color code to array circles
      // push color name to array nameList
      // render by setState. 
 
-/*    console.log('getLineColor, lines are ', this.state.circleColors);
+/*    console.log('getLineColor, lines are ', this.state.circles);
     
-    let circles = []
-    let nameList = [];
+    
     
     lineList.forEach( function(id) {
 
@@ -235,11 +239,30 @@ class TripPlanner extends React.Component {
       }
     })
 
-    let nameStr = nameList.join(', ');
-
-    this.setState({ circleColors: circles, lineNames: nameStr });
-    console.log('circle is ', this.state.circleColors, ' line is ',this.state.lineNames);*/
     
+
+    
+    ;*/
+   
+    let lineInfo = await lineList.forEach(async function (line) {
+
+      let response = await axios.get('/api/linecolor/' + line);
+
+      circles.push(response.data[0].color)
+      name = response.data[0].name.replace(':', '').split(' ')
+      nameList.push(name[0]);
+
+    });
+    
+    //let B = await A;
+
+    let nameStr = nameList.join(', ');
+    this.setState({ circles: circles, lineNames: nameStr });
+
+    //this.setState({ circles: color});
+    console.log(nameList)
+ 
+    console.log('circle is ', this.state.circles, ' line is ', this.state.lineNames)
   }
   
   
@@ -388,7 +411,7 @@ class TripPlanner extends React.Component {
           
         <div className="directions-step">
           <div className="directions-line-header">
-            {this.state.circleColors.map((circle, index) => (<div key= {index} className="line-circle" style={{backgroundColor: circle}}></div>))}
+            {this.state.circles.map((circle, index) => (<div key= {index} className="line-circle" style={{backgroundColor: circle}}></div>))}
             <p className="line-name">{this.state.lineNames} Line</p>
             <p className="line-direction">towards {this.state.toward}</p>
           </div>
