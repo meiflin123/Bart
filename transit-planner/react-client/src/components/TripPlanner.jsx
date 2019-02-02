@@ -32,7 +32,7 @@ class TripPlanner extends React.Component {
     this.fetchLines = this.fetchLines.bind(this);
     this.getDirection = this.getDirection.bind(this);
     this.transfer = this.transfer.bind(this);
-    this.getLineColor= this.getLineColor.bind(this);
+    this.getLineHeader= this.getLineHeader.bind(this);
     this.compareLines= this.compareLines.bind(this);
     this.isCorrectDirection = this.isCorrectDirection.bind(this);
     this.displayStops = this.displayStops.bind(this);
@@ -74,7 +74,7 @@ class TripPlanner extends React.Component {
     this.setState({ stops: [] });
     const LinesOfStations = await this.fetchLines();
     const shareLine = await this.compareLines(this.state.linesWithStartStation, this.state.linesWithEndStation);
-    const lineColor = await this.getLineColor(this.state.lines)
+    const lineColor = await this.getLineHeader(this.state.lines)
     
   }
 
@@ -135,7 +135,7 @@ class TripPlanner extends React.Component {
 
         if (linesOfStart[i].line_id === linesOfEnd[j].line_id) {
           //transfer = false;
-                //this.getLineColor(this.state.linesWithStartStation[i].line_id)
+                //this.getLineHeader(this.state.linesWithStartStation[i].line_id)
           sharedLine = linesOfStart[i].line_id;
           response = await this.isCorrectDirection(sharedLine);
       
@@ -204,27 +204,41 @@ class TripPlanner extends React.Component {
     console.log('display stops ', this.state.stops);
   }
 
-
-  async getLineColor(lineList){
+  async getLineHeader(lineList){
 
     let circles = [];
     let name = [];
     let nameList= [];
+    let nameStr = '';
+    let secondSpace = null;
+    let destination = null;
+    let toward = [];
+    let towardStr = '';
 
    // get circle color and line name from database for each line in the linelist 
      // push color code to array circles
      // push color name to array nameList, modify response.data. 
+     // push destination to array toward, modify response.data
      // render by setState. 
 
   for (var i = 0; i < lineList.length; i++) {
-    let response = await axios.get('/api/linecolor/' + lineList[i]);
-    circles.push('#' + response.data[0].color)
-    name = response.data[0].name.replace(':', '').split(' ')
-    nameList.push(name[0]);
-  }
+    const response = await axios.get('/api/linecolor/' + lineList[i]);
+    const data = response.data[0];
 
-    let nameStr = nameList.join(', ');
-    this.setState({ circles: circles, lineNames: nameStr });
+    circles.push('#' + data.color)
+    name = data.name.replace(':', '').split(' ')
+    nameList.push(name[0]);
+
+    secondSpace = data.name.indexOf('towards');
+    destination = data.name.slice(secondSpace + 7);
+    if (!toward.includes(destination)) {
+      toward.push(destination);
+    }
+  
+  }
+    nameStr = nameList.join(', ');
+    towardStr = toward.join(', ');
+    this.setState({ circles: circles, lineNames: nameStr, toward: towardStr });
  
     console.log('circle is ', this.state.circles, ' line is ', this.state.lineNames)
   }
@@ -261,14 +275,14 @@ class TripPlanner extends React.Component {
             endingStopIndex = i;
             console.log('found end' + JSON.stringify(response.data[i]))
           }}
-           // let destination = stops[stops.length -1].name
+           //
     if (!this.state.toward.includes(destination)) {
       this.state.toward.push(destination)
     }
     console.log('toward ', this.state.toward, lineid)
     
     
-    this.getLineColor(lineid)
+    this.getLineHeader(lineid)
     
     
     console.log('state of the stops is ', this.state.stops);
