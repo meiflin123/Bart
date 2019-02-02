@@ -3,13 +3,6 @@ import axios from 'axios';
 import Transfer from './Transfer.jsx';
 import Lines from './Lines.jsx';
 
-let color = {
-      '1 and 2' :['Red', '#e11a57'], 
-      '3 and 4' :['Yellow', '#fdf057'],
-      '5 and 6' :['Blue', '#2aabe2'],
-      '7 and 8' :['Green', '#4fb848'],
-      '9 and 10' :['Orange','#f9a11d']
-};
 
 class TripPlanner extends React.Component {
   constructor(props) {
@@ -158,6 +151,7 @@ class TripPlanner extends React.Component {
     console.log('common line is ', this.state.lines)  
   }
 
+
   async isCorrectDirection(lineId) {
    
     const response = await axios.get('/api/lines/' + lineId);
@@ -217,54 +211,23 @@ class TripPlanner extends React.Component {
     let name = [];
     let nameList= [];
 
-   // if a line id appears inside of the object lineColor
+   // get circle color and line name from database for each line in the linelist 
      // push color code to array circles
-     // push color name to array nameList
+     // push color name to array nameList, modify response.data. 
      // render by setState. 
 
-/*    console.log('getLineColor, lines are ', this.state.circles);
-    
-    
-    
-    lineList.forEach( function(id) {
-
-      for (let line in color) {
-
-        if (line.includes(id) && !circles.includes(color[line][0])) {
-  
-          nameList.push(color[line][0]);
-          circles.push(color[line][1]);
-         
-        }
-      }
-    })
-
-    
-
-    
-    ;*/
-   
-    let lineInfo = await lineList.forEach(async function (line) {
-
-      let response = await axios.get('/api/linecolor/' + line);
-
-      circles.push(response.data[0].color)
-      name = response.data[0].name.replace(':', '').split(' ')
-      nameList.push(name[0]);
-
-    });
-    
-    //let B = await A;
+  for (var i = 0; i < lineList.length; i++) {
+    let response = await axios.get('/api/linecolor/' + lineList[i]);
+    circles.push('#' + response.data[0].color)
+    name = response.data[0].name.replace(':', '').split(' ')
+    nameList.push(name[0]);
+  }
 
     let nameStr = nameList.join(', ');
     this.setState({ circles: circles, lineNames: nameStr });
-
-    //this.setState({ circles: color});
-    console.log(nameList)
  
     console.log('circle is ', this.state.circles, ' line is ', this.state.lineNames)
   }
-  
   
   /*displayStops(lineid, transferid) {
     this.setState({toward: []})
@@ -411,6 +374,7 @@ class TripPlanner extends React.Component {
           
         <div className="directions-step">
           <div className="directions-line-header">
+
             {this.state.circles.map((circle, index) => (<div key= {index} className="line-circle" style={{backgroundColor: circle}}></div>))}
             <p className="line-name">{this.state.lineNames} Line</p>
             <p className="line-direction">towards {this.state.toward}</p>
