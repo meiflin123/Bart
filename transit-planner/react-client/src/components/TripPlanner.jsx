@@ -317,7 +317,10 @@ class TripPlanner extends React.Component {
     let response1 = null;
     let response2 = null;
     let shareTransferId = null;
-    let transferToEnd = null;
+    let distance = 0;
+    let shortest = 100;
+    let rightLine2 = null;
+    let finalTransferId = null;
     
     
     for (let i = 0; i < linesMix.length; i++) {
@@ -343,15 +346,24 @@ class TripPlanner extends React.Component {
               shareTransferId = transferStations1[j].station_id;   
 
               console.log('shared transfer id is ', shareTransferId, 'line2 is ', line2)
-              transferToEnd = await this.distanceToStop(shareTransferId, this.state.endStationId, line2);
+              distance = await this.distanceToStop(shareTransferId, this.state.endStationId, line2);
+
+              if (distance < shortest) {
+                shortest = distance;
+                rightLine2 = line2;
+                finalTransferId = shareTransferId;
+              }
 
               /*this.displayStops(line1, transferid)*/
-              console.log(transferToEnd);
+             
             }
 
           }
         }   
       }
+       console.log(shortest, rightLine2, finalTransferId);
+       
+       this.displayStops()
       
     }
     //console.log(transferList)
@@ -387,10 +399,11 @@ class TripPlanner extends React.Component {
     let endIndex = null;
     let distance = null;
 
-
     for (let i = 0; i < stops.length; i++) {
       if (stops[i].station_id === transferId) {
         transferIndex = i;
+     
+        console.log(stops[i].name)
       }
       if (stops[i].station_id === endId) {
         endIndex = i;
@@ -398,7 +411,7 @@ class TripPlanner extends React.Component {
     }
 
     distance = endIndex - transferIndex;
-    return distance > 0? distance : console.log(transferId, line2, 'not feasible to end station')
+    return distance > 0? distance : console.log(transferId, line, 'not feasible to end station')
 
   }
 
