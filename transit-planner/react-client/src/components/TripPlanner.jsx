@@ -25,7 +25,7 @@ class TripPlanner extends React.Component {
       circles: [],
       lineNames: '',
       lines: [],
-      shortest: 100
+      transferToEnd: 100
 
     }
 
@@ -136,7 +136,7 @@ class TripPlanner extends React.Component {
           //transfer = false;
                 //this.getLineHeader(this.state.linesWithStartStation[i].line_id)
           sharedLine = linesOfStart[i].line_id;
-          response = await this.isCorrectDirection(sharedLine);
+          response = await this.isCorrectDirection(sharedLine, this.state.startStationId, this.state.endStationId);
        
           if (response) {
             directRoute.push(sharedLine);
@@ -159,14 +159,14 @@ class TripPlanner extends React.Component {
     }
   }
 
-  async isCorrectDirection(lineId, transferId) {
+  async isCorrectDirection(lineId, startId, endId) {
    
     const response = await axios.get('/api/lines/' + lineId);
     const currentLine = response.data;
 
 
-    const startId = transferId || this.state.startStationId;
-    const endId = this.state.endStationId;
+    //const startId = transferId || this.state.startStationId;
+   // const endId = this.state.endStationId;
 
     let startIndex = null;  
     let endIndex = null;
@@ -218,7 +218,7 @@ class TripPlanner extends React.Component {
     const stops = allStops.slice(startIndex, endIndex + 1);
     this.setState({stops: stops})
 
-    console.log('display stops ', this.state.stops);
+    console.log('display stops ', this.state.stops, ' all stops are ', allStops);
   }
 
   async getLineHeader(lineList){
@@ -338,9 +338,9 @@ class TripPlanner extends React.Component {
     let response1 = null;
     let response2 = null;
     let shareTransferId = null;
-    let distance = 0;
-    let shortest = 100;
-    let correctLine1 = null;
+    let transferToEnd = 100;
+    let startToTransfer = 100;
+    let correctLine1 = [];
     let correctLine2 = null;
     let finalTransferId = null;
     
@@ -367,14 +367,19 @@ class TripPlanner extends React.Component {
             if (transferStations1[j].station_id === transferStations2[k].station_id) {
               shareTransferId = transferStations1[j].station_id;   
 
-              console.log('shared transfer id is ', shareTransferId, 'line2 is ', line2)
-              distance = await this.isCorrectDirection(line2, shareTransferId);
+             
+              let findLine2 = await this.isCorrectDirection(line2, shareTransferId, this.state.endStationId);
+              let findLine1 = await this.isCorrectDirection(line1, this.state.startStationId, shareTransferId);
 
-              if (distance < shortest) {
-                shortest = distance;
+              if (findLine2 <= transferToEnd && !correctLine1.includes(line1) && findLine1 <= startToTransfer) {
+                
+                transferToEnd = findLine2;
                 correctLine2 = line2;
-                this.setState({lines: [line1]})
+                correctLine1.push(line1)
+                this.setState({lines: correctLine1})
                 finalTransferId = shareTransferId;
+
+                console.log('shared transfer id is ', shareTransferId, 'line2 is ', line2, 'line1 is ', line1)
 
               }          
             }
@@ -384,8 +389,8 @@ class TripPlanner extends React.Component {
       }     
     }
   
-    console.log(shortest, correctLine2, finalTransferId);
-    this.displayStops(this.state.startStationId, finalTransferId, this.state.lines);
+    console.log(transferToEnd, ' line2 is ', correctLine2, ' transfer id is ', finalTransferId, ' line 1 is ', this.state.lines);
+    let displayStops = await this.displayStops(this.state.startStationId, finalTransferId, this.state.lines);
     this.getLineHeader(this.state.lines)
 
   }
