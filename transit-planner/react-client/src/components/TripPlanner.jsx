@@ -340,8 +340,7 @@ class TripPlanner extends React.Component {
           for (let k = 0; k < transferStations2.length; k++) {
 
             if (transferStations1[j].station_id === transferStations2[k].station_id) {
-
-              shareTransferId = transferStations1[j].station_id;
+              shareTransferId = transferStations1[j].station_id;   
 
               console.log('shared transfer id is ', shareTransferId, 'line2 is ', line2)
               transferToEnd = await this.distanceToStop(shareTransferId, this.state.endStationId, line2);
@@ -399,7 +398,7 @@ class TripPlanner extends React.Component {
     }
 
     distance = endIndex - transferIndex;
-    return distance > 0? distance : console.log(transferId,' is not convenient transfer station')
+    return distance > 0? distance : console.log(transferId, line2, 'not feasible to end station')
 
   }
 
