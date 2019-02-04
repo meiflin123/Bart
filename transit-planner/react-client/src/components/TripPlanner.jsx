@@ -141,7 +141,7 @@ class TripPlanner extends React.Component {
           if (response) {
             directRoute.push(sharedLine);
             console.log(response)
-
+ 
             if (this.state.stops.length === 0) {
               this.displayStops(this.state.startStationId, this.state.endStationId, sharedLine);
             }
@@ -257,7 +257,7 @@ class TripPlanner extends React.Component {
     towardStr = toward.join(', ');
     this.setState({ circles: circles, lineNames: nameStr, toward: towardStr });
  
-    console.log('circle is ', this.state.circles, ' line is ', this.state.lineNames)
+    console.log('circle is ', this.state.circles, ' line is ', this.state.lineNames, ' lineList is ', lineList)
   }
   
   /*displayStops(lineid, transferid) {
@@ -373,7 +373,7 @@ class TripPlanner extends React.Component {
               if (distance < shortest) {
                 shortest = distance;
                 correctLine2 = line2;
-                correctLine1 = line1;
+                this.setState({lines: [line1]})
                 finalTransferId = shareTransferId;
 
               }          
@@ -385,7 +385,9 @@ class TripPlanner extends React.Component {
     }
   
     console.log(shortest, correctLine2, finalTransferId);
-    this.displayStops(this.state.startStationId, finalTransferId, correctLine1);
+    this.displayStops(this.state.startStationId, finalTransferId, this.state.lines);
+    this.getLineHeader(this.state.lines)
+
   }
 
   async distanceToStop(transferId, endId, line) {
@@ -469,7 +471,7 @@ class TripPlanner extends React.Component {
         </div>    
           </div>
            <div className="transfer">
-         {/* {<Transfer />}*/}
+          {<Transfer />}
         </div>
           <div className="directions-step">
             <div className="directions-line-header">

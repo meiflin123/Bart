@@ -5,7 +5,7 @@ import axios from 'axios';
 class Transfer extends React.Component {
   constructor(props) {
     super(props);
-    console.log(this.props.lines)
+    console.log(this.props)
 
   }
 
