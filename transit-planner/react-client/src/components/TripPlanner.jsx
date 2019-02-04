@@ -119,13 +119,13 @@ class TripPlanner extends React.Component {
     // compare two arrays, any share line id?
       //yes?
          //pass line id to function isCorrectDirection
-         // if isCorrectDirection returns true, push the line id to array feasible Routes. 
-      // no? 
+         // if isCorrectDirection returns true, push the line id to array direct Routes. 
+      // no? ()
          //need to transfer
 
     let sharedLine = null;
     let response = null;
-    let feasibleRoutes = [];
+    let directRoute = [];
 
     for (let i = 0; i < linesOfStart.length; i++) {
 
@@ -140,15 +140,18 @@ class TripPlanner extends React.Component {
           response = await this.isCorrectDirection(sharedLine);
       
           if (response === true) {
-            feasibleRoutes.push(sharedLine);
+            directRoute.push(sharedLine);
           }
-
         }
       }    
     };
 
-    this.setState({ lines: feasibleRoutes });
-    console.log('common line is ', this.state.lines)  
+    this.setState({ lines: directRoute });
+    console.log('common line is ', this.state.lines);
+
+    if (this.state.lines.length === 0) {
+      console.log('need transfer')
+    }
   }
 
 
