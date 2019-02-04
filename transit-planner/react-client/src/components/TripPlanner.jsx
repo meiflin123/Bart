@@ -325,10 +325,11 @@ class TripPlanner extends React.Component {
     // linesMix  = [ [1,2], [3,5], ...] for example.
     // for each line in each pair in linesMix, axios get the transfer stations
       // if any share transfer station
-        // pass transfer station and line2 to distanceToEnd
-        // pick the transfer station that's closest to the ending station && pass to isCorrctDirection.
+        // pass transfer station id, endstation id, and line2 to isCorrectDirection
+        // pass start station id, transfer station id, to isCorrectDirection
           // display stops from start stop to transfer stop from first line
           // display stops from transfer stop to ending stop from second line
+          // display lineheaders
       // if no transfer station, also no direct route?
         // (impossible, bart is powerful.)
     let line1 = null;
