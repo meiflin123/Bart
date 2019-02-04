@@ -189,7 +189,6 @@ class TripPlanner extends React.Component {
     };
 
     console.log('isCorrectDirection, line id is ', lineId, ' start Index is ', startIndex, ' end Index is ', endIndex)
-   
      
   }
 
@@ -305,7 +304,8 @@ class TripPlanner extends React.Component {
     // linesMix  = [ [1,2], [3,5], ...] for example.
     // for each line in each pair in linesMix, axios get the transfer stations
       // if any share transfer station
-        // pick the transfer station that's closest to the destination.
+        // pass transfer station and line2 to distanceToEnd
+        // pick the transfer station that's closest to the ending station && pass to isCorrctDirection.
           // display stops from start stop to transfer stop from first line
           // display stops from transfer stop to ending stop from second line
       // if no transfer station, also no direct route?
@@ -315,7 +315,9 @@ class TripPlanner extends React.Component {
     let transferStations1 = [];
     let transferStations2 = [];
     let response1 = null;
-    let response2 = null
+    let response2 = null;
+    let shareTransferId = null;
+    
     
     for (let i = 0; i < linesMix.length; i++) {
       line1 = linesMix[i][0];
@@ -329,11 +331,29 @@ class TripPlanner extends React.Component {
       //fetch transfer stations from line2
       response2 = await axios.get('/api/transfer/' + line2)
       transferStations2 = response2.data;
-      console.log('transferStations on line ', line2, ' are ', JSON.stringify(transferStations2))
+      console.log('transferStations on line ', line2, ' are ', JSON.stringify(transferStations2));
+
+      if (transferStations1.length !== 0 && transferStations2.length !== 0) {
+
+        for (let j = 0; j < transferStations1.length; j++) {
+          for (let k = 0; k < transferStations2.length; k++) {
+
+            if (transferStations1[j].station_id === transferStations2[k].station_id) {
+
+              shareTransferId = transferStations1[j].station_id;
+              this.distanceToStop(shareTransferId, this.state.endStationId, line2);
+
+              /*this.displayStops(line1, transferid)*/
+            }
+
+          }
+        }   
+      }
+      
     }
-    
+    //console.log(transferList)
    /* 
-    let transferid = 'station_id'
+    
     let index = null;
     console.log(line1, line2)
     
@@ -343,25 +363,26 @@ class TripPlanner extends React.Component {
 
         // if line1 and line2 share same transfer station, 
           // find stops starting from line1.
-        for (let i = 0; i < transferStations1.length; i++) {
-          for (let j = 0; j < transferStations2.length; j++) {
-
-            if (transferStations1[i].station_id === transferStations2[j].station_id) {
-              transferid = transferStations1[i].station_id;
-              console.log('shared transferstation id is', transferid, 'line1 is ', line1)
-              
-              this.displayStops(line1, transferid)
-            }
-
-          }
-        }
-      })
+        
       .catch((error)=>{
          console.log(error);
        })*/
 
     
   }
+
+  async distanceToStop(transferId, endId, line) {
+    //fetch stops on this line = (line2)
+    // for loop stops, find the index of the transfer station and index of the end station 
+      // if distance = (index of end station - index of transfer station) > 0,
+        // return distance
+    //let response = await axios('')
+
+    console.log(transferId, endId, line)
+
+
+  }
+
 
   componentDidMount() {
     this.displayStationList();
