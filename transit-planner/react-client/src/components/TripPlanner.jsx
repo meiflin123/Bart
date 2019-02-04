@@ -317,6 +317,7 @@ class TripPlanner extends React.Component {
     let response1 = null;
     let response2 = null;
     let shareTransferId = null;
+    let transferToEnd = null;
     
     
     for (let i = 0; i < linesMix.length; i++) {
@@ -341,9 +342,12 @@ class TripPlanner extends React.Component {
             if (transferStations1[j].station_id === transferStations2[k].station_id) {
 
               shareTransferId = transferStations1[j].station_id;
-              this.distanceToStop(shareTransferId, this.state.endStationId, line2);
+
+              console.log('shared transfer id is ', shareTransferId, 'line2 is ', line2)
+              transferToEnd = await this.distanceToStop(shareTransferId, this.state.endStationId, line2);
 
               /*this.displayStops(line1, transferid)*/
+              console.log(transferToEnd);
             }
 
           }
@@ -378,8 +382,24 @@ class TripPlanner extends React.Component {
         // return distance
     //let response = await axios('')
 
-    console.log(transferId, endId, line)
+    const response = await axios.get('/api/lines/' + line);
+    const stops = response.data;
+    let transferIndex = null;
+    let endIndex = null;
+    let distance = null;
 
+
+    for (let i = 0; i < stops.length; i++) {
+      if (stops[i].station_id === transferId) {
+        transferIndex = i;
+      }
+      if (stops[i].station_id === endId) {
+        endIndex = i;
+      }
+    }
+
+    distance = endIndex - transferIndex;
+    return distance > 0? distance : console.log(transferId,' is not convenient transfer station')
 
   }
 
