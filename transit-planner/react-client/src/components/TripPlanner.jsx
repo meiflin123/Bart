@@ -121,7 +121,7 @@ class TripPlanner extends React.Component {
     let sharedLine = null;
     let response = null;
     let directRoute = [];
-    let linesMix
+    let linesMix = [];
 
     for (let i = 0; i < linesOfStart.length; i++) {
 
@@ -300,30 +300,46 @@ class TripPlanner extends React.Component {
   }*/
 
 
-  transfer(lines) {
-    let line1 = lines[0];
-    let line2 = lines[1];
+  async transfer(linesMix) {
+
+    // linesMix  = [ [1,2], [3,5], ...] for example.
+    // for each line in each pair in linesMix, axios get the transfer stations
+      // if any share transfer station
+        // pick the transfer station that's closest to the destination.
+          // display stops from start stop to transfer stop from first line
+          // display stops from transfer stop to ending stop from second line
+      // if no transfer station, also no direct route?
+        // (impossible, bart is powerful.)
+    let line1 = null;
+    let line2 = null;
     let transferStations1 = [];
     let transferStations2 = [];
+    let response1 = null;
+    let response2 = null
+    
+    for (let i = 0; i < linesMix.length; i++) {
+      line1 = linesMix[i][0];
+      line2 = linesMix[i][1];
+
+      // fetch transfer stations of line1
+      response1 = await axios.get('/api/transfer/' + line1);
+      transferStations1 = response1.data;
+      console.log('transferStations on line ',line1,' are ', JSON.stringify(transferStations1));
+
+      //fetch transfer stations from line2
+      response2 = await axios.get('/api/transfer/' + line2)
+      transferStations2 = response2.data;
+      console.log('transferStations on line ', line2, ' are ', JSON.stringify(transferStations2))
+    }
+    
+   /* 
     let transferid = 'station_id'
     let index = null;
     console.log(line1, line2)
     
-    // fetch transfer stations from line1
-    axios.get('/api/transfer/' + line1)
-      .then((response) => {
-        transferStations1 = response.data;
-        console.log('transferStations on line ',line1,' are ', JSON.stringify(transferStations1))
-      })
-      .catch((error)=>{
-         console.log(error);
-       })
+    
 
-    //fetch transfer stations from line2
-    axios.get('/api/transfer/' + line2)
-      .then((response) => {
-        const transferStations2 = response.data;
-        console.log('transferStations on line ', line2, ' are ', JSON.stringify(transferStations2))
+    
 
         // if line1 and line2 share same transfer station, 
           // find stops starting from line1.
@@ -342,7 +358,7 @@ class TripPlanner extends React.Component {
       })
       .catch((error)=>{
          console.log(error);
-       })
+       })*/
 
     
   }
