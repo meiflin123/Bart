@@ -12,17 +12,20 @@ class TripPlanner extends React.Component {
       stationList: [{'id': 0, 'name': 'select station'}],
       startStation: '',
       startStationId: null,
+      startIndex: null,
       endStation: '',
       endStationId: null,
+      endIndex: null,
       linesWithStartStation: [],
       linesWithEndStation: [],
-      possibleLine: null,
-      lineCombinations: [],
+      //lineCombinations: [],
+      allStopsOnALine: [],
       stops: [],
       toward: [],
       circles: [],
       lineNames: '',
-      lines: []
+      lines: [],
+      shortest: 100
 
     }
 
@@ -33,7 +36,7 @@ class TripPlanner extends React.Component {
     this.getDirection = this.getDirection.bind(this);
     this.transfer = this.transfer.bind(this);
     this.getLineHeader= this.getLineHeader.bind(this);
-    this.compareLines= this.compareLines.bind(this);
+    this.getSharedLine= this.getSharedLine.bind(this);
     this.isCorrectDirection = this.isCorrectDirection.bind(this);
     this.displayStops = this.displayStops.bind(this);
    
@@ -71,7 +74,7 @@ class TripPlanner extends React.Component {
 
     this.setState({ stops: [] });
     const LinesOfStations = await this.fetchLines();
-    const shareLine = await this.compareLines(this.state.linesWithStartStation, this.state.linesWithEndStation);
+    const shareLine = await this.getSharedLine(this.state.linesWithStartStation, this.state.linesWithEndStation);
     const lineColor = await this.getLineHeader(this.state.lines)
     
   }  
@@ -109,12 +112,12 @@ class TripPlanner extends React.Component {
      
   }
 
-  async compareLines(linesOfStart, linesOfEnd) {
+  async getSharedLine(linesOfStart, linesOfEnd) {
 
     // compare two arrays, any share line id?
       //yes?
          //pass line id to function isCorrectDirection
-         // if isCorrectDirection returns true, push the line id to array direct Routes. 
+         // if isCorrectDirection returns stops, push the line id to array direct Routes. 
       // no? ()
          //pass linesMix to transfer.
 
@@ -134,29 +137,35 @@ class TripPlanner extends React.Component {
                 //this.getLineHeader(this.state.linesWithStartStation[i].line_id)
           sharedLine = linesOfStart[i].line_id;
           response = await this.isCorrectDirection(sharedLine);
-      
-          if (response === true) {
+       
+          if (response) {
             directRoute.push(sharedLine);
+            console.log(response)
+
+            if (this.state.stops.length === 0) {
+              this.displayStops(this.state.startIndex, this.state.endIndex, this.state.allStopsOnALine);
+            }
           }
+
         } else { linesMix.push([linesOfStart[i].line_id, linesOfEnd[j].line_id]); }
       }    
     };
 
     this.setState({ lines: directRoute });
-    console.log('common line is ', this.state.lines);
+    console.log('direct route are ', this.state.lines);
 
     if (this.state.lines.length === 0) {
       this.transfer(linesMix);
     }
   }
 
-  async isCorrectDirection(lineId) {
+  async isCorrectDirection(lineId, transferId) {
    
     const response = await axios.get('/api/lines/' + lineId);
     const currentLine = response.data;
 
 
-    const startId = this.state.startStationId;
+    const startId = transferId || this.state.startStationId;
     const endId = this.state.endStationId;
 
     let startIndex = null;  
@@ -177,15 +186,13 @@ class TripPlanner extends React.Component {
         //yes? 
            //call display stops for the first time, 
            //other times, ignore(since stops will be same)
-           //return true back to CompareLines.
+           //return true back to getSharedLine.
         //no?
           //not do anything.
    
     if(startIndex !== null && endIndex !== null && startIndex < endIndex) {
-      if (this.state.stops.length === 0) {
-        this.displayStops(startIndex, endIndex, currentLine);
-      }
-       return true;     
+      this.setState({ startIndex: startIndex, endIndex: endIndex, allStopsOnALine:currentLine})
+      return true;     
     };
 
     console.log('isCorrectDirection, line id is ', lineId, ' start Index is ', startIndex, ' end Index is ', endIndex)
@@ -348,8 +355,8 @@ class TripPlanner extends React.Component {
               console.log('shared transfer id is ', shareTransferId, 'line2 is ', line2)
               distance = await this.distanceToStop(shareTransferId, this.state.endStationId, line2);
 
-              if (distance < shortest) {
-                shortest = distance;
+              if (distance < this.state.shortest) {
+                this.setState({ shortest: distance });
                 rightLine2 = line2;
                 finalTransferId = shareTransferId;
               }
@@ -362,7 +369,7 @@ class TripPlanner extends React.Component {
         }   
       }
        console.log(shortest, rightLine2, finalTransferId);
-       
+
        this.displayStops()
       
     }
@@ -408,10 +415,12 @@ class TripPlanner extends React.Component {
       if (stops[i].station_id === endId) {
         endIndex = i;
       }
+
+     // if (transferIndex! == null &&)
     }
 
     distance = endIndex - transferIndex;
-    return distance > 0? distance : console.log(transferId, line, 'not feasible to end station')
+    return distance > 0? [distance, stops] : console.log(transferId, line, 'not feasible to end station')
 
   }
 
