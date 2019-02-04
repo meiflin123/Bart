@@ -143,7 +143,7 @@ class TripPlanner extends React.Component {
             console.log(response)
 
             if (this.state.stops.length === 0) {
-              this.displayStops(this.state.startIndex, this.state.endIndex, this.state.allStopsOnALine);
+              this.displayStops(this.state.startStationId, this.state.endStationId, sharedLine);
             }
           }
 
@@ -191,17 +191,31 @@ class TripPlanner extends React.Component {
           //not do anything.
    
     if(startIndex !== null && endIndex !== null && startIndex < endIndex) {
-      this.setState({ startIndex: startIndex, endIndex: endIndex, allStopsOnALine:currentLine})
-      return true;     
+      return endIndex - startIndex; 
+      console.log('isCorrectDirection, line id is ', lineId, ' start Index is ', startIndex, ' end Index is ', endIndex)    
     };
 
-    console.log('isCorrectDirection, line id is ', lineId, ' start Index is ', startIndex, ' end Index is ', endIndex)
+    
      
   }
 
-  displayStops(start, end, stopsList) {
+  async displayStops(startId, endId, lineId) {
 
-    const stops = stopsList.slice(start, end + 1);
+    const response = await axios.get('/api/lines/' + lineId);
+    const allStops = response.data;
+    let startIndex = null;
+    let endIndex = null;
+
+    for (let i = 0; i < allStops.length; i++) {
+      if (allStops[i].station_id === startId) {
+        startIndex = i
+      }
+      if (allStops[i].station_id === endId) {
+        endIndex = i;
+      }
+    }
+
+    const stops = allStops.slice(startIndex, endIndex + 1);
     this.setState({stops: stops})
 
     console.log('display stops ', this.state.stops);
@@ -326,7 +340,8 @@ class TripPlanner extends React.Component {
     let shareTransferId = null;
     let distance = 0;
     let shortest = 100;
-    let rightLine2 = null;
+    let correctLine1 = null;
+    let correctLine2 = null;
     let finalTransferId = null;
     
     
@@ -353,44 +368,24 @@ class TripPlanner extends React.Component {
               shareTransferId = transferStations1[j].station_id;   
 
               console.log('shared transfer id is ', shareTransferId, 'line2 is ', line2)
-              distance = await this.distanceToStop(shareTransferId, this.state.endStationId, line2);
+              distance = await this.isCorrectDirection(line2, shareTransferId);
 
-              if (distance < this.state.shortest) {
-                this.setState({ shortest: distance });
-                rightLine2 = line2;
+              if (distance < shortest) {
+                shortest = distance;
+                correctLine2 = line2;
+                correctLine1 = line1;
                 finalTransferId = shareTransferId;
-              }
 
-              /*this.displayStops(line1, transferid)*/
-             
+              }          
             }
-
           }
-        }   
-      }
-       console.log(shortest, rightLine2, finalTransferId);
-
-       this.displayStops()
-      
+        }
+       
+      }     
     }
-    //console.log(transferList)
-   /* 
-    
-    let index = null;
-    console.log(line1, line2)
-    
-    
-
-    
-
-        // if line1 and line2 share same transfer station, 
-          // find stops starting from line1.
-        
-      .catch((error)=>{
-         console.log(error);
-       })*/
-
-    
+  
+    console.log(shortest, correctLine2, finalTransferId);
+    this.displayStops(this.state.startStationId, finalTransferId, correctLine1);
   }
 
   async distanceToStop(transferId, endId, line) {
