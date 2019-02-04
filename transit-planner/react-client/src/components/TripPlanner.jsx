@@ -36,7 +36,6 @@ class TripPlanner extends React.Component {
     this.compareLines= this.compareLines.bind(this);
     this.isCorrectDirection = this.isCorrectDirection.bind(this);
     this.displayStops = this.displayStops.bind(this);
-
    
   }
 
@@ -68,7 +67,6 @@ class TripPlanner extends React.Component {
   };
 
 
-
   async getDirection() {
 
     this.setState({ stops: [] });
@@ -76,9 +74,7 @@ class TripPlanner extends React.Component {
     const shareLine = await this.compareLines(this.state.linesWithStartStation, this.state.linesWithEndStation);
     const lineColor = await this.getLineHeader(this.state.lines)
     
-  }
-
-    
+  }  
 
   async fetchLines() {
 
@@ -113,7 +109,6 @@ class TripPlanner extends React.Component {
      
   }
 
-
   async compareLines(linesOfStart, linesOfEnd) {
 
     // compare two arrays, any share line id?
@@ -121,11 +116,12 @@ class TripPlanner extends React.Component {
          //pass line id to function isCorrectDirection
          // if isCorrectDirection returns true, push the line id to array direct Routes. 
       // no? ()
-         //need to transfer
+         //pass linesMix to transfer.
 
     let sharedLine = null;
     let response = null;
     let directRoute = [];
+    let linesMix
 
     for (let i = 0; i < linesOfStart.length; i++) {
 
@@ -142,7 +138,7 @@ class TripPlanner extends React.Component {
           if (response === true) {
             directRoute.push(sharedLine);
           }
-        }
+        } else { linesMix.push([linesOfStart[i].line_id, linesOfEnd[j].line_id]); }
       }    
     };
 
@@ -150,10 +146,9 @@ class TripPlanner extends React.Component {
     console.log('common line is ', this.state.lines);
 
     if (this.state.lines.length === 0) {
-      console.log('need transfer')
+      this.transfer(linesMix);
     }
   }
-
 
   async isCorrectDirection(lineId) {
    
@@ -197,7 +192,6 @@ class TripPlanner extends React.Component {
    
      
   }
-
 
   displayStops(start, end, stopsList) {
 
