@@ -21,11 +21,15 @@ class TripPlanner extends React.Component {
       //lineCombinations: [],
       allStopsOnALine: [],
       stops: [],
-      stopsOnXferTrain: [],
+      trfLStops: [],
       toward: [],
+      trfToward:[],
       circles: [],
+      trfCircles:[],
       lineNames: '',
-      lines: [],
+      trfLineNames: '',
+      line: [],
+      trfLine:[],
       distance2: 100
 
     }
@@ -77,6 +81,7 @@ class TripPlanner extends React.Component {
     const LinesOfStations = await this.fetchLines();
     const shareLine = await this.getSharedLine(this.state.linesWithStartStation, this.state.linesWithEndStation);
     const lineColor = await this.getLineHeader(this.state.lines)
+
     
   }  
 
@@ -254,11 +259,14 @@ class TripPlanner extends React.Component {
     }
   
   }
-    nameStr = nameList.join(', ');
-    towardStr = toward.join(', ');
-    this.setState({ circles: circles, lineNames: nameStr, toward: towardStr });
+    nameStr = nameList.join(' or ');
+    towardStr = toward.join(' / ');
+
+    //this.setState({ circles: circles, lineNames: nameStr, toward: towardStr });
  
-    console.log('circle is ', this.state.circles, ' line is ', this.state.lineNames, ' lineList is ', lineList)
+    console.log('circle is ', this.state.circles, ' line is ', this.state.lineNames, ' lineList is ', lineList);
+
+    return { circles: circles, lineNames: nameStr, toward: towardStr }
   }
   
   /*displayStops(lineid, transferid) {
@@ -390,22 +398,27 @@ class TripPlanner extends React.Component {
                  if (!correctL2.includes(line2)) {
                    correctL2.push(line2);
                  }
-              }          
-
-              console.log('shared transfer id is ', shareTrf, 'line2 is ', line2, 'line1 is ', line1, 'distance is ', distance)
-                     
+              }                                   
             }
           }
         }
       }     
     
-    this.setState({lines: correctL1})
+    this.setState({line: correctL1, trfLine: correctL2})
 
-    let stops = await this.displayStops(this.state.startStationId, trfId, this.state.lines[0]);
+    let stops = await this.displayStops(this.state.startStationId, trfId, this.state.line[0]);
+    let trfLStops = await this.displayStops(trfId, this.state.endStationId, this.state.trfLine[0]);
 
-    this.setState({ stops: stops });
+    this.setState({ stops: stops, trfLStops: trfLStops });
     
-    this.getLineHeader(this.state.lines)
+    let lineHeader= await this.getLineHeader(this.state.line);
+    let trfLineHeader = await this.getLineHeader(this.state.trfLine);
+
+    this.setState({ circles: lineHeader.circles, lineNames: lineHeader.lineNames, toward: lineHeader.toward, 
+      trfCircles: trfLineHeader.circles, trfLineNames: trfLineHeader.lineNames, trfToward:trfLineHeader.toward});
+
+    console.log('shared transfer id is ', shareTrf, 'line2 is ', correctL2, 'line1 is ', correctL1, 'distance is ', distance)
+    console.log(this.state.circles, this.state.lineNames, this.state.toward, this.state.trfCircles, this.state.trfLineNames, this.state.trfToward)
 
   }
 
@@ -470,35 +483,28 @@ class TripPlanner extends React.Component {
             <p className="line-name">{ this.state.startStation } to { this.state.endStation }</p>
             <p>31 minutes (arrive at 5:51pm)</p>
           </div>
+
           <div className="directions-step">
             <div className="directions-line-header">
               <p className="line-name">Start at { this.state.startStation }</p>
             </div>
           </div>
-          <div className="directions-step">
+
           
-        <div className="directions-step">
-          <DirectionStep stops={ this.state.stops } circles={ this.state.circles } lineNames={this.state.lineNames} toward ={this.state.toward}/>
-        </div>    
-          </div>
-        
-           <div className="transfer">
-          <div className="directions-step">
-            <div className="directions-line-header">
-              <p className="line-name">Change Trains</p>
-          </div>
+            <DirectionStep stops={ this.state.stops } circles={ this.state.circles } lineNames={ this.state.lineNames } toward ={ this.state.toward } />
+       
+
 
           <div className="directions-step">
             <div className="directions-line-header">
-              <div className="line-circle" style={{backgroundColor: "#0099cc"}}></div>
-              <p className="line-name">Blue Line</p>
-              <p className="line-direction">towards Station F</p>
+              <p className="line-name">Change Trains</p>
             </div>
-            <ul>
-            </ul>
           </div>
-           </div>
-        </div>
+
+           
+            <DirectionStep stops= { this.state.trfLStops } circles={ this.state.trfCircles } lineNames={ this.state.trfLineNames } toward={ this.state.trfToward } />
+         
+
           <div className="directions-step">
             <div className="directions-line-header">
               <p className="line-name">Arrive at { this.state.endStation }</p>
