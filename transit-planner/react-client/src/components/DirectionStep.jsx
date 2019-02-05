@@ -1,38 +1,27 @@
 import React from 'react';
-import $ from 'jquery';
-import axios from 'axios';
 
-class DirectionStep extends React.Component {
-  constructor(props) {
-    super(props);
-    console.log(this.props)
+const DirectionStep = props => {
+  
+    console.log(props.stops)
 
-  }
-
-
-  render() {
+ 
     return (
-
-          <div className="directions-step">
+          
+           <div>
             <div className="directions-line-header">
-              <p className="line-name">Change Trains</p>
-            </div>
-         
-
-          <div className="directions-step">
-            <div className="directions-line-header">
-              <div className="line-circle" style={{backgroundColor: "#0099cc"}}></div>
-              <p className="line-name">Blue Line</p>
-              <p className="line-direction">towards Station F</p>
-            </div>
-            <ul>
-             {this.props.stopsOnXferTrain.map((stop) => (<li key={stop.id}>{stop.name}</li>))}
-            </ul>
-          </div>
+            
+             {props.circles.map((circle, index) => (<div key= {index} className="line-circle" style={{backgroundColor: circle}}></div>))}
+          
+            <p className="line-name">{props.lineNames} Line</p>
+            <p className="line-direction">towards {props.toward}</p>
            </div>
-          )
+            <ul>
+              {props.stops.map((stop) => (<li key={stop.id}>{stop.name}</li>))}
+            </ul>
+            </div>
 
-  }
-}
+    )
+  
+};
 
 export default DirectionStep;

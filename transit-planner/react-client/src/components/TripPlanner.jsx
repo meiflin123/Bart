@@ -391,7 +391,7 @@ class TripPlanner extends React.Component {
                    correctL2.push(line2);
                  }
               }          
-              
+
               console.log('shared transfer id is ', shareTrf, 'line2 is ', line2, 'line1 is ', line1, 'distance is ', distance)
                      
             }
@@ -467,34 +467,41 @@ class TripPlanner extends React.Component {
 
         <div className="directions">
           <div className="directions-summary">
-            <p className="line-name">{this.state.startStation} to {this.state.endStation}</p>
+            <p className="line-name">{ this.state.startStation } to { this.state.endStation }</p>
             <p>31 minutes (arrive at 5:51pm)</p>
           </div>
           <div className="directions-step">
             <div className="directions-line-header">
-              <p className="line-name">Start at {this.state.startStation}</p>
+              <p className="line-name">Start at { this.state.startStation }</p>
             </div>
           </div>
           <div className="directions-step">
           
         <div className="directions-step">
-          <div className="directions-line-header">
-
-            {this.state.circles.map((circle, index) => (<div key= {index} className="line-circle" style={{backgroundColor: circle}}></div>))}
-            <p className="line-name">{this.state.lineNames} Line</p>
-            <p className="line-direction">towards {this.state.toward}</p>
-          </div>
-            <ul>
-              {this.state.stops.map((stop) => (<li key={stop.id}>{stop.name}</li>))}
-            </ul>
+          <DirectionStep stops={ this.state.stops } circles={ this.state.circles } lineNames={this.state.lineNames} toward ={this.state.toward}/>
         </div>    
           </div>
+        
            <div className="transfer">
-          {<DirectionStep stopsOnXferTrain={this.state.stopsOnXferTrain}/>}
+          <div className="directions-step">
+            <div className="directions-line-header">
+              <p className="line-name">Change Trains</p>
+          </div>
+
+          <div className="directions-step">
+            <div className="directions-line-header">
+              <div className="line-circle" style={{backgroundColor: "#0099cc"}}></div>
+              <p className="line-name">Blue Line</p>
+              <p className="line-direction">towards Station F</p>
+            </div>
+            <ul>
+            </ul>
+          </div>
+           </div>
         </div>
           <div className="directions-step">
             <div className="directions-line-header">
-              <p className="line-name">Arrive at {this.state.endStation}</p>
+              <p className="line-name">Arrive at { this.state.endStation }</p>
             </div>
           </div>
         </div>
