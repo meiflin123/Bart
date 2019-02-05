@@ -18,7 +18,6 @@ class TripPlanner extends React.Component {
       endIndex: null,
       linesWithStartStation: [],
       linesWithEndStation: [],
-      //lineCombinations: [],
       allStopsOnALine: [],
       stops: [],
       trfLStops: [],
@@ -80,7 +79,6 @@ class TripPlanner extends React.Component {
     this.setState({ stops: [] });
     const LinesOfStations = await this.fetchLines();
     const shareLine = await this.getSharedLine(this.state.linesWithStartStation, this.state.linesWithEndStation);
-    const lineColor = await this.getLineHeader(this.state.lines)
 
     
   }  
@@ -107,15 +105,6 @@ class TripPlanner extends React.Component {
     console.log('list of lines having the selected start station : ' , this.state.linesWithStartStation);
     console.log('list of lines having the selected ending station : ' , this.state.linesWithEndStation);
 
-/*
-        this.setState({lineCombinations : lineCombinations})
-        console.log('lineCombinations is ', this.state.lineCombinations)
-        if (transfer === true) {
-          this.state.lineCombinations.map(x => this.transfer(x))
-        }
-      })*/
-
-     
   }
 
   async getSharedLine(linesOfStart, linesOfEnd) {
@@ -136,11 +125,8 @@ class TripPlanner extends React.Component {
 
       for (let j = 0; j < linesOfEnd.length; j++) {
 
-              /*lineCombinations.push([this.state.linesWithStartStation[i].line_id, this.state.linesWithEndStation[j].line_id])*/
-
         if (linesOfStart[i].line_id === linesOfEnd[j].line_id) {
-          //transfer = false;
-                //this.getLineHeader(this.state.linesWithStartStation[i].line_id)
+        
           sharedLine = linesOfStart[i].line_id;
           response = await this.isCorrectDirection(sharedLine, this.state.startStationId, this.state.endStationId);
        
@@ -158,7 +144,9 @@ class TripPlanner extends React.Component {
       }    
     };
 
-    this.setState({ lines: directRoute });
+    
+    const lineColor = await this.getLineHeader(directRoute);
+    this.setState({ line: directRoute, circles: lineColor.circles, lineNames:lineColor.lineNames, toward: lineColor.toward });
     console.log('direct route are ', this.state.lines);
 
     if (this.state.lines.length === 0) {
@@ -170,10 +158,6 @@ class TripPlanner extends React.Component {
    
     const response = await axios.get('/api/lines/' + lineId);
     const currentLine = response.data;
-
-
-    //const startId = transferId || this.state.startStationId;
-   // const endId = this.state.endStationId;
 
     let startIndex = null;  
     let endIndex = null;
@@ -268,65 +252,6 @@ class TripPlanner extends React.Component {
 
     return { circles: circles, lineNames: nameStr, toward: towardStr }
   }
-  
-  /*displayStops(lineid, transferid) {
-    this.setState({toward: []})
-    console.log('reached displayStops, common line id is: ' + lineid);
-    
-
-    // get all the stops along a line
-    axios.get('/api/lines/' + lineid)
-      .then((response) => {
-
-        let startingStopIndex = null;  
-        let endingStopIndex= null;
-        let stops = null
-        console.log('stops fetched from first line ',lineid, ' is ', response.data )
-
-        for (let i = 0; i < response.data.length; i++) {
-          // if a station id of a line matches the starting station id, set index. 
-          if (response.data[i].station_id === this.state.startStationId) {
-            startingStopIndex = i;
-            console.log('found start' + JSON.stringify(response.data[i]))
-          }
-          // if the last station of a line matches the ending station id, set index. 
-
-          if (response.data[response.data.length -1].station_id === this.state.endStationId && response.data[i].station_id === transferid) {
-            endingStopIndex = i;
-            console.log('ending station id is ', this.state.endStationId, response.data[i])
-
-          }
-
-          if (response.data[i].station_id === this.state.endStationId) {
-            endingStopIndex = i;
-            console.log('found end' + JSON.stringify(response.data[i]))
-          }}
-           //
-    if (!this.state.toward.includes(destination)) {
-      this.state.toward.push(destination)
-    }
-    console.log('toward ', this.state.toward, lineid)
-    
-    
-    this.getLineHeader(lineid)
-    
-    
-    console.log('state of the stops is ', this.state.stops);
-
-    return 'found line';
-
-  }
-          
-             
-
-      })
-
-
-      .catch((error)=>{
-         console.log(error);
-      })
-
-  }*/
 
 
   async transfer(linesMix) {
@@ -489,22 +414,17 @@ class TripPlanner extends React.Component {
               <p className="line-name">Start at { this.state.startStation }</p>
             </div>
           </div>
-
           
             <DirectionStep stops={ this.state.stops } circles={ this.state.circles } lineNames={ this.state.lineNames } toward ={ this.state.toward } />
-       
-
 
           <div className="directions-step">
             <div className="directions-line-header">
               <p className="line-name">Change Trains</p>
             </div>
           </div>
-
            
             <DirectionStep stops= { this.state.trfLStops } circles={ this.state.trfCircles } lineNames={ this.state.trfLineNames } toward={ this.state.trfToward } />
          
-
           <div className="directions-step">
             <div className="directions-line-header">
               <p className="line-name">Arrive at { this.state.endStation }</p>
