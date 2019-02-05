@@ -1,6 +1,6 @@
 import React from 'react';
 import axios from 'axios';
-import Transfer from './Transfer.jsx';
+import DirectionStep from './DirectionStep.jsx';
 import Lines from './Lines.jsx';
 
 
@@ -21,11 +21,12 @@ class TripPlanner extends React.Component {
       //lineCombinations: [],
       allStopsOnALine: [],
       stops: [],
+      stopsOnXferTrain: [],
       toward: [],
       circles: [],
       lineNames: '',
       lines: [],
-      transferToEnd: 100
+      distance2: 100
 
     }
 
@@ -143,7 +144,8 @@ class TripPlanner extends React.Component {
             console.log(response)
  
             if (this.state.stops.length === 0) {
-              this.displayStops(this.state.startStationId, this.state.endStationId, sharedLine);
+              let stops = await this.displayStops(this.state.startStationId, this.state.endStationId, sharedLine);
+              this.setState({stops: stops})
             }
           }
 
@@ -216,9 +218,8 @@ class TripPlanner extends React.Component {
     }
 
     const stops = allStops.slice(startIndex, endIndex + 1);
-    this.setState({stops: stops})
-
-    console.log('display stops ', this.state.stops, ' all stops are ', allStops);
+    console.log('display stops ', this.state.stops, ' all stops are ', allStops, ' startId is ', startId, ' endId is ', endId, ' lineId is ', lineId);
+    return stops;
   }
 
   async getLineHeader(lineList){
@@ -329,69 +330,81 @@ class TripPlanner extends React.Component {
         // pass start station id, transfer station id, to isCorrectDirection
           // display stops from start stop to transfer stop from first line
           // display stops from transfer stop to ending stop from second line
-          // display lineheaders
       // if no transfer station, also no direct route?
-        // (impossible, bart is powerful.)
-    let line1 = null;
-    let line2 = null;
-    let transferStations1 = [];
-    let transferStations2 = [];
-    let response1 = null;
-    let response2 = null;
-    let shareTransferId = null;
-    let transferToEnd = 100;
-    let startToTransfer = 100;
-    let correctLine1 = [];
-    let correctLine2 = null;
-    let finalTransferId = null;
-    
+        // no such case. (no codes)
+
+    let trfStasOnL1 = [];
+    let trfStaOnL2 = [];
+    let shareTrf = null;
+    let distance = 100;
+    let correctL1 = [];
+    let correctL2 = [];
+    let trfId = null;
     
     for (let i = 0; i < linesMix.length; i++) {
-      line1 = linesMix[i][0];
-      line2 = linesMix[i][1];
+      let line1 = linesMix[i][0];
+      let line2 = linesMix[i][1];
 
       // fetch transfer stations of line1
-      response1 = await axios.get('/api/transfer/' + line1);
-      transferStations1 = response1.data;
-      console.log('transferStations on line ',line1,' are ', JSON.stringify(transferStations1));
+      let response1 = await axios.get('/api/transfer/' + line1);
+      trfStasOnL1 = response1.data;
+      console.log('transferStations on line 1 ',line1,' are ', JSON.stringify(trfStasOnL1));
 
       //fetch transfer stations from line2
-      response2 = await axios.get('/api/transfer/' + line2)
-      transferStations2 = response2.data;
-      console.log('transferStations on line ', line2, ' are ', JSON.stringify(transferStations2));
+      let response2 = await axios.get('/api/transfer/' + line2)
+      trfStaOnL2 = response2.data;
+      console.log('transferStations on line 2', line2, ' are ', JSON.stringify(trfStaOnL2));
 
-      if (transferStations1.length !== 0 && transferStations2.length !== 0) {
+      
 
-        for (let j = 0; j < transferStations1.length; j++) {
-          for (let k = 0; k < transferStations2.length; k++) {
+        for (let j = 0; j < trfStasOnL1.length; j++) {
+          for (let k = 0; k < trfStaOnL2.length; k++) {
 
-            if (transferStations1[j].station_id === transferStations2[k].station_id) {
-              shareTransferId = transferStations1[j].station_id;   
+            if (trfStasOnL1[j].station_id === trfStaOnL2[k].station_id) {
+              shareTrf = trfStasOnL1[j].station_id;   
+              
 
-             
-              let findLine2 = await this.isCorrectDirection(line2, shareTransferId, this.state.endStationId);
-              let findLine1 = await this.isCorrectDirection(line1, this.state.startStationId, shareTransferId);
+              let stopsCountL2 = await this.isCorrectDirection(line2, shareTrf, this.state.endStationId);
+              let stopsCountL1 = await this.isCorrectDirection(line1, this.state.startStationId, shareTrf);
 
-              if (findLine2 <= transferToEnd && !correctLine1.includes(line1) && findLine1 <= startToTransfer) {
-                
-                transferToEnd = findLine2;
-                correctLine2 = line2;
-                correctLine1.push(line1)
-                this.setState({lines: correctLine1})
-                finalTransferId = shareTransferId;
+              // if stopsCountL2  + stopsCountL1 < distance 
+               // update distance 
+               // set correct lines
+              // if equal
+               // avoid duplicated lines.
+               // add correct lines
+              let totStops = stopsCountL1 + stopsCountL2;
 
-                console.log('shared transfer id is ', shareTransferId, 'line2 is ', line2, 'line1 is ', line1)
+              if (totStops < distance) {
+                distance = totStops;
+                correctL2 = [line2];
+                trfId = shareTrf;
+                correctL1 = [line1];
+              }
 
+              if (totStops === distance) {
+                 if (!correctL1.includes(line1)) {
+                   correctL1.push(line1);
+                 }
+
+                 if (!correctL2.includes(line2)) {
+                   correctL2.push(line2);
+                 }
               }          
+              
+              console.log('shared transfer id is ', shareTrf, 'line2 is ', line2, 'line1 is ', line1, 'distance is ', distance)
+                     
             }
           }
         }
-       
       }     
-    }
-  
-    console.log(transferToEnd, ' line2 is ', correctLine2, ' transfer id is ', finalTransferId, ' line 1 is ', this.state.lines);
-    let displayStops = await this.displayStops(this.state.startStationId, finalTransferId, this.state.lines);
+    
+    this.setState({lines: correctL1})
+
+    let stops = await this.displayStops(this.state.startStationId, trfId, this.state.lines[0]);
+
+    this.setState({ stops: stops });
+    
     this.getLineHeader(this.state.lines)
 
   }
@@ -477,7 +490,7 @@ class TripPlanner extends React.Component {
         </div>    
           </div>
            <div className="transfer">
-          {<Transfer />}
+          {<DirectionStep stopsOnXferTrain={this.state.stopsOnXferTrain}/>}
         </div>
           <div className="directions-step">
             <div className="directions-line-header">

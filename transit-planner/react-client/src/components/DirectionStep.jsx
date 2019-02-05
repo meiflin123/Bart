@@ -2,7 +2,7 @@ import React from 'react';
 import $ from 'jquery';
 import axios from 'axios';
 
-class Transfer extends React.Component {
+class DirectionStep extends React.Component {
   constructor(props) {
     super(props);
     console.log(this.props)
@@ -26,9 +26,7 @@ class Transfer extends React.Component {
               <p className="line-direction">towards Station F</p>
             </div>
             <ul>
-              <li> Station C </li>
-              <li> Station D </li>
-              <li> Station E </li>
+             {this.props.stopsOnXferTrain.map((stop) => (<li key={stop.id}>{stop.name}</li>))}
             </ul>
           </div>
            </div>
@@ -37,4 +35,4 @@ class Transfer extends React.Component {
   }
 }
 
-export default Transfer;
+export default DirectionStep;
