@@ -35,7 +35,7 @@ class TripPlanner extends React.Component {
     this.getDirection = this.getDirection.bind(this);
     this.transfer = this.transfer.bind(this);
     this.getLineHead= this.getLineHead.bind(this);
-    this.getDirRoute= this.getDirRoute.bind(this);
+    this.getDirectRoute= this.getDirectRoute.bind(this);
     this.getStopsInfo = this.getStopsInfo.bind(this);
   }
 
@@ -71,7 +71,7 @@ class TripPlanner extends React.Component {
 
     this.setState({ stops: [] });
     const LinesOfStations = await this.fetchLines();
-    const shareLine = await this.getDirRoute(this.state.linesWithStrtSta, this.state.linesWithEndSta);
+    const shareLine = await this.getDirectRoute(this.state.linesWithStrtSta, this.state.linesWithEndSta);
     
   }  
 
@@ -99,7 +99,7 @@ class TripPlanner extends React.Component {
 
   }
 
-  async getDirRoute(linesOfStart, linesOfEnd) {
+  async getDirectRoute(linesOfStart, linesOfEnd) {
 
     // compare two arrays, any share line id?
       //yes?
@@ -175,7 +175,7 @@ class TripPlanner extends React.Component {
     };
      // if start index exists AND end index exists AND start index < end index are all true,
         //yes? 
-           //return diff back to getDirRoute.
+           //return diff back to getDirectRoute.
         //no?
           //not do anything.
    
