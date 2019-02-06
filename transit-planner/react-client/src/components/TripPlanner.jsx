@@ -9,16 +9,13 @@ class TripPlanner extends React.Component {
     super(props);
 
     this.state = {
-      stationList: [{'id': 0, 'name': 'select station'}],
-      startStation: '',
-      startStationId: null,
-      startIndex: null,
-      endStation: '',
-      endStationId: null,
-      endIndex: null,
-      linesWithStartStation: [],
-      linesWithEndStation: [],
-      allStopsOnALine: [],
+      staList: [{'id': 0, 'name': 'select station'}],
+      strtSta: '',
+      strtStaId: null,
+      endSta: '',
+      endStaId: null,
+      linesWithStrtSta: [],
+      linesWithEndSta: [],
       stops: [],
       trfLStops: [],
       toward: [],
@@ -29,31 +26,29 @@ class TripPlanner extends React.Component {
       trfLineNames: '',
       line: [],
       trfLine:[],
-      distance2: 100
-
     }
 
-    this.displayStationList = this.displayStationList.bind(this);
-    this.selectStart = this.selectStart.bind(this);
+    this.displayStaList = this.displayStaList.bind(this);
+    this.selectStrt = this.selectStrt.bind(this);
     this.selectEnd = this.selectEnd.bind(this);
     this.fetchLines = this.fetchLines.bind(this);
     this.getDirection = this.getDirection.bind(this);
     this.transfer = this.transfer.bind(this);
-    this.getLineHeader= this.getLineHeader.bind(this);
-    this.getSharedLine= this.getSharedLine.bind(this);
+    this.getLineHead= this.getLineHead.bind(this);
+    this.getDirRoute= this.getDirRoute.bind(this);
     this.isCorrectDirection = this.isCorrectDirection.bind(this);
     this.displayStops = this.displayStops.bind(this);
    
   }
 
 // display all stations and those favorite ones would be on top of the list.
-  displayStationList() {
+  displayStaList() {
      axios.get('/api/stations/')
 
       .then((response) => {
         const stations = response.data
-        const FavToUnfavStations = stations.sort((a, b) => b.is_favorite - a.is_favorite);
-        this.setState({stationList: this.state.stationList.concat(FavToUnfavStations)})
+        const fromFav = stations.sort((a, b) => b.is_favorite - a.is_favorite);
+        this.setState({staList: this.state.staList.concat(fromFav)});
     
       })
 
@@ -64,12 +59,12 @@ class TripPlanner extends React.Component {
 
   // get user selected station'names and station id.
 
-  selectStart(e) {
-    this.setState({startStation: JSON.parse(e.target.value).station, startStationId: JSON.parse(e.target.value).id});
+  selectStrt(e) {
+    this.setState({strtSta: JSON.parse(e.target.value).station, strtStaId: JSON.parse(e.target.value).id});
   };
 
   selectEnd(e) {
-    this.setState({endStation: JSON.parse(e.target.value).station, endStationId:JSON.parse(e.target.value).id});
+    this.setState({endSta: JSON.parse(e.target.value).station, endStaId:JSON.parse(e.target.value).id});
 
   };
 
@@ -78,8 +73,7 @@ class TripPlanner extends React.Component {
 
     this.setState({ stops: [] });
     const LinesOfStations = await this.fetchLines();
-    const shareLine = await this.getSharedLine(this.state.linesWithStartStation, this.state.linesWithEndStation);
-
+    const shareLine = await this.getDirRoute(this.state.linesWithStrtSta, this.state.linesWithEndSta);
     
   }  
 
@@ -90,29 +84,31 @@ class TripPlanner extends React.Component {
     // fetch lines that have the ending station.
       //set state for this list of line
   
-    console.log('starting station is ' + this.state.startStation + ' station_id is ' + this.state.startStationId);
-    console.log('ending station is ' + this.state.endStation + ' station_id is ' + this.state.endStationId)
+    console.log('starting station is ' + this.state.strtSta + ' station_id is ' + this.state.strtStaId);
+    console.log('ending station is ' + this.state.endSta + ' station_id is ' + this.state.endStaId)
 
 
-    const responseStart = await axios.get('/api/station/' + this.state.startStationId)
-    const linesWithStartStation = responseStart.data;
-    this.setState({linesWithStartStation: linesWithStartStation});
+    const responseStart = await axios.get('/api/station/' + this.state.strtStaId)
+    const linesWithStrtSta = responseStart.data;
+    this.setState({linesWithStrtSta: linesWithStrtSta});
 
-    const responseEnd = await axios.get('/api/station/' + this.state.endStationId)
-    const linesWithEndStation = responseEnd.data;
-    this.setState({linesWithEndStation: linesWithEndStation});
+    const responseEnd = await axios.get('/api/station/' + this.state.endStaId)
+    const linesWithEndSta = responseEnd.data;
+    this.setState({linesWithEndSta: linesWithEndSta});
 
-    console.log('list of lines having the selected start station : ' , this.state.linesWithStartStation);
-    console.log('list of lines having the selected ending station : ' , this.state.linesWithEndStation);
+    console.log('list of lines having the selected start station : ' , this.state.linesWithStrtSta);
+    console.log('list of lines having the selected ending station : ' , this.state.linesWithEndSta);
 
   }
 
-  async getSharedLine(linesOfStart, linesOfEnd) {
+  async getDirRoute(linesOfStart, linesOfEnd) {
 
     // compare two arrays, any share line id?
       //yes?
          //pass line id to function isCorrectDirection
          // if isCorrectDirection returns stops, push the line id to array direct Routes. 
+         //call display stops only for the first match, 
+           //for other matches, stops will be same, no need to update stops)
       // no? ()
          //pass linesMix to transfer.
 
@@ -125,31 +121,36 @@ class TripPlanner extends React.Component {
 
       for (let j = 0; j < linesOfEnd.length; j++) {
 
+        // shared line id?
         if (linesOfStart[i].line_id === linesOfEnd[j].line_id) {
         
           sharedLine = linesOfStart[i].line_id;
-          response = await this.isCorrectDirection(sharedLine, this.state.startStationId, this.state.endStationId);
+          response = await this.isCorrectDirection(sharedLine, this.state.strtStaId, this.state.endStaId);
        
           if (response) {
             directRoute.push(sharedLine);
-            console.log(response)
+            console.log(response);
  
             if (this.state.stops.length === 0) {
-              let stops = await this.displayStops(this.state.startStationId, this.state.endStationId, sharedLine);
+              let stops = await this.displayStops(this.state.strtStaId, this.state.endStaId, sharedLine);
               this.setState({stops: stops})
             }
           }
+
+        // no shared line id? prepare to take transfer
 
         } else { linesMix.push([linesOfStart[i].line_id, linesOfEnd[j].line_id]); }
       }    
     };
 
-    
-    const lineColor = await this.getLineHeader(directRoute);
-    this.setState({ line: directRoute, circles: lineColor.circles, lineNames:lineColor.lineNames, toward: lineColor.toward });
-    console.log('direct route are ', this.state.lines);
+    const lineColor = await this.getLineHead(directRoute);
 
-    if (this.state.lines.length === 0) {
+    this.setState({ line: directRoute, circles: lineColor.circles, lineNames:lineColor.lineNames, toward: lineColor.toward });
+
+    console.log('direct route are ', this.state.line);
+
+    //need transfer?
+    if (this.state.line.length === 0) {
       this.transfer(linesMix);
     }
   }
@@ -157,41 +158,39 @@ class TripPlanner extends React.Component {
   async isCorrectDirection(lineId, startId, endId) {
    
     const response = await axios.get('/api/lines/' + lineId);
-    const currentLine = response.data;
+    const stops = response.data;
 
-    let startIndex = null;  
+    let staIndex = null;  
     let endIndex = null;
+    let distance = null;
 
     // look for start and end station on this line.
 
-    for (let i = 0; i < currentLine.length; i++) {
+    for (let i = 0; i < stops.length; i++) {
 
-      if (currentLine[i].station_id === startId) {
-        startIndex = i;
+      if (stops[i].station_id === startId) {
+        staIndex = i;
       }  
-      if (currentLine[i].station_id === endId) {
+      if (stops[i].station_id === endId) {
         endIndex = i;     
       }
     };
      // if start index exists AND end index exists AND start index < end index are all true,
         //yes? 
-           //call display stops for the first time, 
-           //other times, ignore(since stops will be same)
-           //return true back to getSharedLine.
+           //return diff back to getDirRoute.
         //no?
           //not do anything.
    
-    if(startIndex !== null && endIndex !== null && startIndex < endIndex) {
-      return endIndex - startIndex; 
-      console.log('isCorrectDirection, line id is ', lineId, ' start Index is ', startIndex, ' end Index is ', endIndex)    
-    };
-
-    
-     
+    if(staIndex !== null && endIndex !== null && staIndex < endIndex) {
+      distance = endIndex - staIndex
+      return distance; 
+      console.log('isCorrectDirection, line id is ', lineId, ' start Index is ', staIndex, ' end Index is ', endIndex)    
+    };  
   }
 
   async displayStops(startId, endId, lineId) {
 
+  // fetch stops along this line
     const response = await axios.get('/api/lines/' + lineId);
     const allStops = response.data;
     let startIndex = null;
@@ -206,70 +205,75 @@ class TripPlanner extends React.Component {
       }
     }
 
+    // get stops from startId to endId
     const stops = allStops.slice(startIndex, endIndex + 1);
     console.log('display stops ', this.state.stops, ' all stops are ', allStops, ' startId is ', startId, ' endId is ', endId, ' lineId is ', lineId);
     return stops;
   }
 
-  async getLineHeader(lineList){
+  async getLineHead(lines){
 
     let circles = [];
-    let name = [];
     let nameList= [];
-    let nameStr = '';
-    let secondSpace = null;
+    let lineNames = '';
     let destination = null;
-    let toward = [];
-    let towardStr = '';
+    let towardList = [];
+    let toward = '';
 
-   // get circle color and line name from database for each line in the linelist 
-     // push color code to array circles
-     // push color name to array nameList, modify response.data. 
-     // push destination to array toward, modify response.data
-     // render by setState. 
-
-  for (var i = 0; i < lineList.length; i++) {
-    const response = await axios.get('/api/linecolor/' + lineList[i]);
+  // get line info for each single line in lines
+  for (var i = 0; i < lines.length; i++) {
+    const response = await axios.get('/api/linecolor/' + lines[i]);
     const data = response.data[0];
 
+    //get line circle
+      //from db, e.g. data.color = "e11a57"
     circles.push('#' + data.color)
-    name = data.name.replace(':', '').split(' ')
-    nameList.push(name[0]);
+    
 
-    secondSpace = data.name.indexOf('towards');
-    destination = data.name.slice(secondSpace + 7);
-    if (!toward.includes(destination)) {
-      toward.push(destination);
+    //get line name
+      //from db, e.g. data.name = "Red: towards Richmond"
+    const name = data.name.replace(':', '').split(' ')
+    nameList.push(name[0]); //'Red'
+
+
+    //get toward
+      //from db, e.g. data.name = "Orange: towards Warm Springs"
+    const towardsIndex = data.name.indexOf('towards');
+    destination = data.name.slice(towardsIndex + 7); //'Warm Springs'
+
+
+    // e.g. line 7 and 9 both toward Warm Springs. Show only one Warm Spring.
+    if (!towardList.includes(destination)) {  
+      towardList.push(destination);
     }
-  
   }
-    nameStr = nameList.join(' or ');
-    towardStr = toward.join(' / ');
 
-    //this.setState({ circles: circles, lineNames: nameStr, toward: towardStr });
+    lineNames = nameList.join(' or ');
+    toward = towardList.join(' / ');
  
-    console.log('circle is ', this.state.circles, ' line is ', this.state.lineNames, ' lineList is ', lineList);
+    console.log('circle is ', this.state.circles, ' line is ', this.state.lineNames, ' lines is ', lines);
 
-    return { circles: circles, lineNames: nameStr, toward: towardStr }
+    return { circles: circles, lineNames: lineNames, toward: toward }
   }
 
 
   async transfer(linesMix) {
 
     // linesMix  = [ [1,2], [3,5], ...] for example.
-    // for each line in each pair in linesMix, axios get the transfer stations
+    // axios get the transfer stations for each pair 
       // if any share transfer station
-        // pass transfer station id, endstation id, and line2 to isCorrectDirection
-        // pass start station id, transfer station id, to isCorrectDirection
-          // display stops from start stop to transfer stop from first line
-          // display stops from transfer stop to ending stop from second line
-      // if no transfer station, also no direct route?
+        // test direction and distance from start station to trf, from trf to end station.
+          // get the shoretest route ( smallest tot of stops)
+
+        // display stops from start stop to transfer stop from line1
+        // display stops from transfer stop to ending stop from line2
+      // if no transfer station, also previously confirmed no direct route?
         // no such case. (no codes)
 
     let trfStasOnL1 = [];
     let trfStaOnL2 = [];
     let shareTrf = null;
-    let distance = 100;
+    let totDistance = 100;
     let correctL1 = [];
     let correctL2 = [];
     let trfId = null;
@@ -289,33 +293,35 @@ class TripPlanner extends React.Component {
       console.log('transferStations on line 2', line2, ' are ', JSON.stringify(trfStaOnL2));
 
       
-
         for (let j = 0; j < trfStasOnL1.length; j++) {
           for (let k = 0; k < trfStaOnL2.length; k++) {
 
+            // share trf station?
             if (trfStasOnL1[j].station_id === trfStaOnL2[k].station_id) {
               shareTrf = trfStasOnL1[j].station_id;   
-              
 
-              let stopsCountL2 = await this.isCorrectDirection(line2, shareTrf, this.state.endStationId);
-              let stopsCountL1 = await this.isCorrectDirection(line1, this.state.startStationId, shareTrf);
+              // stops Count = distance between two stations on a line.
+              let stopsCountL2 = await this.isCorrectDirection(line2, shareTrf, this.state.endStaId);
+              let stopsCountL1 = await this.isCorrectDirection(line1, this.state.strtStaId, shareTrf);
 
-              // if stopsCountL2  + stopsCountL1 < distance 
+              // each time when stopsCountL2  + stopsCountL1 < distance 
                // update distance 
-               // set correct lines
+               // assign correct line2
+               // assign correct line1
+               // assign trf Id
               // if equal
-               // avoid duplicated lines.
-               // add correct lines
+               // if not duplicated
+                // add correct lines
               let totStops = stopsCountL1 + stopsCountL2;
 
-              if (totStops < distance) {
-                distance = totStops;
+              if (totStops < totDistance) {
+                totDistance = totStops;
                 correctL2 = [line2];
-                trfId = shareTrf;
                 correctL1 = [line1];
+                trfId = shareTrf;
               }
 
-              if (totStops === distance) {
+              if (totStops === totDistance) {
                  if (!correctL1.includes(line1)) {
                    correctL1.push(line1);
                  }
@@ -329,58 +335,33 @@ class TripPlanner extends React.Component {
         }
       }     
     
-    this.setState({line: correctL1, trfLine: correctL2})
+    this.setState({line: correctL1, trfLine: correctL2});
 
-    let stops = await this.displayStops(this.state.startStationId, trfId, this.state.line[0]);
-    let trfLStops = await this.displayStops(trfId, this.state.endStationId, this.state.trfLine[0]);
-
-    this.setState({ stops: stops, trfLStops: trfLStops });
+    let stops = await this.displayStops(this.state.strtStaId, trfId, this.state.line[0]);
+    let trfLStops = await this.displayStops(trfId, this.state.endStaId, this.state.trfLine[0]);
+    let lineHeader= await this.getLineHead(this.state.line);
+    let trfLineHeader = await this.getLineHead(this.state.trfLine);
     
-    let lineHeader= await this.getLineHeader(this.state.line);
-    let trfLineHeader = await this.getLineHeader(this.state.trfLine);
+    this.setState({ 
 
-    this.setState({ circles: lineHeader.circles, lineNames: lineHeader.lineNames, toward: lineHeader.toward, 
-      trfCircles: trfLineHeader.circles, trfLineNames: trfLineHeader.lineNames, trfToward:trfLineHeader.toward});
+      stops: stops, 
+      circles: lineHeader.circles, 
+      lineNames: lineHeader.lineNames, 
+      toward: lineHeader.toward, 
 
-    console.log('shared transfer id is ', shareTrf, 'line2 is ', correctL2, 'line1 is ', correctL1, 'distance is ', distance)
+      trfLStops: trfLStops, 
+      trfCircles: trfLineHeader.circles, 
+      trfLineNames: trfLineHeader.lineNames, 
+      trfToward:trfLineHeader.toward
+    });
+
+    console.log('shared transfer id is ', shareTrf, 'line2 is ', correctL2, 'line1 is ', correctL1, 'totDistance is ', totDistance)
     console.log(this.state.circles, this.state.lineNames, this.state.toward, this.state.trfCircles, this.state.trfLineNames, this.state.trfToward)
 
   }
 
-  async distanceToStop(transferId, endId, line) {
-    //fetch stops on this line = (line2)
-    // for loop stops, find the index of the transfer station and index of the end station 
-      // if distance = (index of end station - index of transfer station) > 0,
-        // return distance
-    //let response = await axios('')
-
-    const response = await axios.get('/api/lines/' + line);
-    const stops = response.data;
-    let transferIndex = null;
-    let endIndex = null;
-    let distance = null;
-
-    for (let i = 0; i < stops.length; i++) {
-      if (stops[i].station_id === transferId) {
-        transferIndex = i;
-     
-        console.log(stops[i].name)
-      }
-      if (stops[i].station_id === endId) {
-        endIndex = i;
-      }
-
-     // if (transferIndex! == null &&)
-    }
-
-    distance = endIndex - transferIndex;
-    return distance > 0? [distance, stops] : console.log(transferId, line, 'not feasible to end station')
-
-  }
-
-
   componentDidMount() {
-    this.displayStationList();
+    this.displayStaList();
   }
 
   render() {
@@ -389,13 +370,13 @@ class TripPlanner extends React.Component {
         <div className="selections">
           Start: 
 
-          <select onChange= {this.selectStart}>{this.state.stationList.map((station, index) => <option value={JSON.stringify({'station': station.name, 'id': station.id})} key={index}>{station.name}</option>)}
+          <select onChange= {this.selectStrt}>{this.state.staList.map((station, index) => <option value={JSON.stringify({'station': station.name, 'id': station.id})} key={index}>{station.name}</option>)}
           </select>
 
           <br />
 
           End: 
-          <select onChange= {this.selectEnd}>{this.state.stationList.map((station, index) => <option value={JSON.stringify({'station': station.name, 'id': station.id})} key={index}>{station.name}</option>)}
+          <select onChange= {this.selectEnd}>{this.state.staList.map((station, index) => <option value={JSON.stringify({'station': station.name, 'id': station.id})} key={index}>{station.name}</option>)}
           </select>
 
           <br />
@@ -405,13 +386,13 @@ class TripPlanner extends React.Component {
 
         <div className="directions">
           <div className="directions-summary">
-            <p className="line-name">{ this.state.startStation } to { this.state.endStation }</p>
+            <p className="line-name">{ this.state.strtSta } to { this.state.endSta }</p>
             <p>31 minutes (arrive at 5:51pm)</p>
           </div>
 
           <div className="directions-step">
             <div className="directions-line-header">
-              <p className="line-name">Start at { this.state.startStation }</p>
+              <p className="line-name">Start at { this.state.strtSta }</p>
             </div>
           </div>
           
@@ -427,7 +408,7 @@ class TripPlanner extends React.Component {
          
           <div className="directions-step">
             <div className="directions-line-header">
-              <p className="line-name">Arrive at { this.state.endStation }</p>
+              <p className="line-name">Arrive at { this.state.endSta }</p>
             </div>
           </div>
         </div>
