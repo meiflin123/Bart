@@ -27,7 +27,7 @@ class TripPlanner extends React.Component {
       line: [],
       trfLine:[],
       trfSta: '',
-      isHidden: false,
+      isHidden: true,
     }
   }
 
