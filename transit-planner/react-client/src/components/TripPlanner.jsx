@@ -26,6 +26,8 @@ class TripPlanner extends React.Component {
       trfLineNames: '',
       line: [],
       trfLine:[],
+      trfSta: '',
+      isHidden: false,
     }
   }
 
@@ -50,12 +52,13 @@ class TripPlanner extends React.Component {
     this.setState({ endSta, endStaId });
 
   };
-
+  
   // invoke getDirection once user click 'Go'
+    // hide the second <DirectionSteps /> and empty stops
 
   async getDirection() {
 
-    this.setState({ stops: [] });
+    this.setState({ stops: [], isHidden: true });
     const LinesOfStations = await this.fetchLines();
     const shareLine = await this.getDirectRoute(this.state.linesWithStrtSta, this.state.linesWithEndSta);
     
@@ -225,7 +228,7 @@ class TripPlanner extends React.Component {
     let totDistance = 100;
     let line = [];
     let trfLine = [];
-    let trfId = null;
+    let trfSta = '';  
     let stops = [];
     let trfLStops = [];
     
@@ -271,7 +274,7 @@ class TripPlanner extends React.Component {
                   totDistance = totStops;
                   trfLine = [line2];
                   line = [line1];
-                  trfId = shareTrf;
+                  trfSta = stopsCountL2.stops[0].name;
                   trfLStops = stopsCountL2.stops;
                   stops = stopsCountL1.stops;
                 }
@@ -292,18 +295,19 @@ class TripPlanner extends React.Component {
         }
       }     
     
-    this.setState({line, trfLine});
+    this.setState({line, trfLine, });
 
     let {circles, lineNames, toward}= await this.getLineHead(this.state.line);
     let trfLineHeader = await this.getLineHead(this.state.trfLine);
     
-    this.setState({ stops, circles, lineNames, toward, trfLStops, 
+    this.setState({ stops, circles, lineNames, toward, trfLStops, trfSta,
       trfCircles: trfLineHeader.circles, 
       trfLineNames: trfLineHeader.lineNames, 
-      trfToward:trfLineHeader.toward
+      trfToward:trfLineHeader.toward,
+      isHidden: false
     });
 
-    console.log('line2 is ', trfLine, 'line1 is ', line, 'totDistance is ', totDistance)
+    console.log('line2 is ', trfLine, 'line1 is ', line, 'totDistance is ', totDistance, ' stops are ', stops)
     console.log(this.state.circles, this.state.lineNames, this.state.toward, this.state.trfCircles, this.state.trfLineNames, this.state.trfToward)
 
   }
@@ -346,14 +350,19 @@ class TripPlanner extends React.Component {
           
             <DirectionStep stops={ this.state.stops } circles={ this.state.circles } lineNames={ this.state.lineNames } toward ={ this.state.toward } />
 
-          <div className="directions-step">
-            <div className="directions-line-header">
-              <p className="line-name">Change Trains</p>
+        {!this.state.isHidden? 
+          <div>
+            <div className="directions-step">
+              <div className="directions-line-header">
+                <p className="line-name">Change Trains at {this.state.trfSta} Station</p>
+              </div>
             </div>
+             
+              <DirectionStep stops= { this.state.trfLStops } circles={ this.state.trfCircles } lineNames={ this.state.trfLineNames } toward={ this.state.trfToward } />
           </div>
-           
-            <DirectionStep stops= { this.state.trfLStops } circles={ this.state.trfCircles } lineNames={ this.state.trfLineNames } toward={ this.state.trfToward } />
-         
+            : false
+
+        } 
           <div className="directions-step">
             <div className="directions-line-header">
               <p className="line-name">Arrive at { this.state.endSta }</p>
