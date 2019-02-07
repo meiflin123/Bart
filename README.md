@@ -18,7 +18,7 @@ This is a solo project I completed as a student at hackreactor. It's a full-stac
 
 ![screen shot 2018-10-18 at 8 12 49 pm](https://user-images.githubusercontent.com/35877838/47195881-c1da9580-d312-11e8-86d3-13f488025c0f.png)
 
-![screen shot 2019-02-05 at 3 22 54 pm](https://user-images.githubusercontent.com/35877838/52310978-253c1200-295a-11e9-809b-9b33e1c64dab.png)
+![screen shot 2019-02-07 at 1 51 15 pm](https://user-images.githubusercontent.com/35877838/52445286-880ae600-2adf-11e9-8c54-98c4d48a1e72.png)
 
 
 
