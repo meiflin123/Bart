@@ -233,8 +233,7 @@ class TripPlanner extends React.Component {
     let trfLStops = [];
     
     for (let i = 0; i < linesMix.length; i++) {
-      let line1 = linesMix[i][0];
-      let line2 = linesMix[i][1];
+      let [line1, line2] = linesMix[i];
 
       // fetch transfer stations of line1
       let response1 = await axios.get('/api/transfer/' + line1);
