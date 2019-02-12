@@ -140,7 +140,7 @@ class TripPlanner extends React.Component {
     console.log('direct route are ', this.state.line);
 
     //transfer?
-    return this.state.line.length === 0 ? this.transfer(linesMix): false;
+    return this.state.line.length === 0 && this.transfer(linesMix);
   }
 
   async getStopsInfo(lineId, strtId, endId) {
@@ -350,7 +350,7 @@ class TripPlanner extends React.Component {
           
             <DirectionStep stops={ this.state.stops } circles={ this.state.circles } lineNames={ this.state.lineNames } toward ={ this.state.toward } />
 
-        {!this.state.isHidden? 
+        {!this.state.isHidden &&
           <div>
             <div className="directions-step">
               <div className="directions-line-header">
@@ -360,8 +360,6 @@ class TripPlanner extends React.Component {
              
               <DirectionStep stops= { this.state.trfLStops } circles={ this.state.trfCircles } lineNames={ this.state.trfLineNames } toward={ this.state.trfToward } />
           </div>
-            : false
-
         } 
           <div className="directions-step">
             <div className="directions-line-header">
