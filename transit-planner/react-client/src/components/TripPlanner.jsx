@@ -294,7 +294,7 @@ class TripPlanner extends React.Component {
         }
       }     
     
-    this.setState({line, trfLine, });
+    this.setState({line, trfLine});
 
     let {circles, lineNames, toward}= await this.getLineHead(this.state.line);
     let trfLineHeader = await this.getLineHead(this.state.trfLine);
