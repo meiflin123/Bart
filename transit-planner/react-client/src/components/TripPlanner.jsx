@@ -105,14 +105,14 @@ class TripPlanner extends React.Component {
     let linesMix = [];
   
 
-    for (let i = 0; i < linesWithStrt.length; i++) {
+    for (let strt of linesWithStrt) {
 
-      for (let j = 0; j < linesWithEnd.length; j++) {
+      for (let end of linesWithEnd) {
 
         // shared line id?
-        if (linesWithStrt[i].line_id === linesWithEnd[j].line_id) {
+        if (strt.line_id === end.line_id) {
         
-          let sharedLine = linesWithStrt[i].line_id;
+          let sharedLine = strt.line_id;
           let response = await this.getStopsInfo(sharedLine, this.state.strtStaId, this.state.endStaId);
 
           // valid?
@@ -128,7 +128,7 @@ class TripPlanner extends React.Component {
 
         // not a good match?  add to lineMix.
 
-        } else { linesMix.push([linesWithStrt[i].line_id, linesWithEnd[j].line_id]); }
+        } else { linesMix.push([strt.line_id, end.line_id]); }
       }    
     };
 
@@ -176,8 +176,8 @@ class TripPlanner extends React.Component {
     let toward = '';
 
   // get line info for each single line in lines
-  for (var i = 0; i < lines.length; i++) {
-    const response = await axios.get('/api/linecolor/' + lines[i]);
+  for (let line of lines) {
+    const response = await axios.get('/api/linecolor/' + line);
     const data = response.data[0];
 
     //get line circle
@@ -232,8 +232,8 @@ class TripPlanner extends React.Component {
     let stops = [];
     let trfLStops = [];
     
-    for (let i = 0; i < linesMix.length; i++) {
-      let [line1, line2] = linesMix[i];
+    for (let linePair of linesMix) {
+      let [line1, line2] = linePair;
 
       // fetch transfer stations of line1
       let response1 = await axios.get('/api/transfer/' + line1);
@@ -246,12 +246,12 @@ class TripPlanner extends React.Component {
       console.log('transferStations on line 2', line2, ' are ', JSON.stringify(trfStaOnL2));
 
       
-        for (let j = 0; j < trfStasOnL1.length; j++) {
-          for (let k = 0; k < trfStaOnL2.length; k++) {
+        for (let trfStaOn1 of trfStasOnL1) {
+          for (let trfStaOn2 of trfStaOnL2) {
 
             // share trf station?
-            if (trfStasOnL1[j].station_id === trfStaOnL2[k].station_id) {
-              let shareTrf = trfStasOnL1[j].station_id;   
+            if (trfStaOn1.station_id === trfStaOn2.station_id) {
+              let shareTrf = trfStaOn1.station_id;   
 
               // stops Count = distance between two stations on a line.
               let stopsCountL2 = await this.getStopsInfo(line2, shareTrf, this.state.endStaId);
