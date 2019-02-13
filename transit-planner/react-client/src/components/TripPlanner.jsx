@@ -71,7 +71,7 @@ class TripPlanner extends React.Component {
 
   async fetchLines(statId) {
     const response = await axios.get('/api/station/' + statId); 
-    return response.data; // e.g. [{line_id = 1, line_id = 2, ...}]
+    return response.data; // e.g. [{line_id: 1, line_id: 2, ...}]
 
   }
 
