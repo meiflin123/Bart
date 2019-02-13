@@ -65,69 +65,57 @@ class TripPlanner extends React.Component {
 
     this.setState({ linesWithStrtSta, linesWithEndSta });
     // is there direct route?
-    const shareLine = await this.getDirectRoute(this.state.linesWithStrtSta, this.state.linesWithEndSta);
+    const directRoute = await this.getDirectRoute(this.state.linesWithStrtSta, this.state.linesWithEndSta);
+
+    if (!directRoute) {
+      this.transfer(this.state.linesWithStrtSta, this.state.linesWithEndSta);
+    }
+
+    const { circles, lineNames,toward } = await this.getLineHead(this.state.line);
+
+    this.setState({ circles, lineNames, toward });
+
     
   }  
 
   async fetchLines(statId) {
     const response = await axios.get('/api/station/' + statId); 
-    return response.data; // e.g. [{line_id: 1}, {line_id: 2}, ...}]
+    //return response.data; // e.g. [{line_id: 1}, {line_id: 2}, ...}]
+    return response.data.map(line => line.line_id);
 
   }
 
   async getDirectRoute(linesWithStrt, linesWithEnd) {
+    let directRoutes = [];
 
     // compare two arrays, any share line id?
-      //yes? each time...
-         // getStopsInfo to check this shared line, 
-           // vaild? add to line. 
-         // call display stops only for the first match, 
-           // for other matches, stops will be same, no update stops
-      // no? each time...
-         //add the i, j line ids to linesMix
-    // if line.length === 0? start transfer.
+    const sharedLine = this.filterSharedLine(linesWithStrt, linesWithEnd);
 
-    let sharedLine = null;
-    let line = [];
-    let linesMix = [];
-  
+    //yes? 
+         // getStopsInfo to check each shared line, 
+    if (sharedLine) {
+      await Promise.all(sharedLine.map(async lineId => {
+        const validLine = await this.getStopsInfo(lineId, this.state.strtStaId, this.state.endStaId);
 
-    for (let strt of linesWithStrt) {
+        // vaild? add to directRoutes array. 
+        if (validLine) {
+          directRoutes.push(lineId);
 
-      for (let end of linesWithEnd) {
+          // display stops only for the first match, 
+          this.state.stops.length === 0 && this.setState({stops: validLine.stops});
+        };
+      }));
 
-        // shared line id?
-        if (strt.line_id === end.line_id) {
-        
-          let sharedLine = strt.line_id;
-          let response = await this.getStopsInfo(sharedLine, this.state.strtStaId, this.state.endStaId);
-
-          // valid?
-          if (response) {
-            line.push(sharedLine);
-            console.log(response);
-
-            // valid and hasn't display stop?
-            if (this.state.stops.length === 0) {
-              this.setState({ stops: response.stops })
-            }
-          }
-
-        // not a good match?  add to lineMix.
-
-        } else { linesMix.push([strt.line_id, end.line_id]); }
-      }    
+      this.setState({ line: directRoutes});
     };
 
+    return directRoutes.length !== 0;  // return back to getDirection.
+  };
 
-    const { circles, lineNames,toward } = await this.getLineHead(line);
 
-    this.setState({ line, circles,lineNames, toward });
-
-    console.log('direct route are ', this.state.line);
-
-    //transfer?
-    return this.state.line.length === 0 && this.transfer(linesMix);
+  filterSharedLine(lineList1, lineList2) {
+    const sharedLine = lineList1.filter(line => lineList2.includes(line));
+    return sharedLine.length !==  0 ? sharedLine : false;
   }
 
   async getStopsInfo(lineId, strtId, endId) {
@@ -150,7 +138,7 @@ class TripPlanner extends React.Component {
 
       console.log('getStopsInfo, line id is ', lineId, ' start Index is ', strtIndex, ' end Index is ', endIndex, ' distance is ', distance);
       return {distance: distance, stops: stopsPiece};   
-    };  
+    };
   }
 
   async getLineHead(lines){
@@ -199,7 +187,7 @@ class TripPlanner extends React.Component {
   }
 
 
-  async transfer(linesMix) {
+  async transfer(linesWithStrt, linesWithEnd) {
 
     // linesMix  = [ [1,2], [3,5], ...] for example.
     // axios get the transfer stations for each pair 
@@ -212,6 +200,7 @@ class TripPlanner extends React.Component {
       // if no transfer station, also previously confirmed no direct route?
         // no such case. (no codes)
 
+    let linesMix = this.createLineMix(linesWithStrt, linesWithEnd);
     let totDistance = 100;
     let line = [];
     let trfLine = [];
@@ -296,6 +285,16 @@ class TripPlanner extends React.Component {
     console.log('line2 is ', trfLine, 'line1 is ', line, 'totDistance is ', totDistance, ' stops are ', stops)
     console.log(this.state.circles, this.state.lineNames, this.state.toward, this.state.trfCircles, this.state.trfLineNames, this.state.trfToward)
 
+  }
+
+  createLineMix(lineList1, lineList2) {
+    let linesMix = [];
+    for (const line1 of lineList1) {
+      for (const line2 of lineList2) {
+        linesMix.push( [line1, line2] );
+      }
+    }
+    return linesMix;
   }
 
   componentDidMount() {
