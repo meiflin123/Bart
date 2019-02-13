@@ -50,7 +50,6 @@ class TripPlanner extends React.Component {
   selectEnd(e) {
     const { endSta, endStaId } = JSON.parse(e.target.value);
     this.setState({ endSta, endStaId });
-
   };
   
   // invoke getDirection once user click 'Go'
@@ -58,21 +57,18 @@ class TripPlanner extends React.Component {
   async getDirection() {
     // set beginning with no stops and hide transfer JSX.
     this.setState({ stops: [], isHidden: true });
-    // fetch lines that have the starting station that user selected. 
+    
     const linesWithStrtSta = await this.fetchLines(this.state.strtStaId);
-     // fetch lines that have the ending station that user selected.
     const linesWithEndSta = await this.fetchLines(this.state.endStaId);
-
     this.setState({ linesWithStrtSta, linesWithEndSta });
-    // is there direct route?
+    
     const directRoute = await this.getDirectRoute(this.state.linesWithStrtSta, this.state.linesWithEndSta);
-
+    // is there direct route? no? transfer.
     if (!directRoute) {
       this.transfer(this.state.linesWithStrtSta, this.state.linesWithEndSta);
     }
 
     const { circles, lineNames,toward } = await this.getLineHead(this.state.line);
-
     this.setState({ circles, lineNames, toward });
 
     
@@ -80,9 +76,7 @@ class TripPlanner extends React.Component {
 
   async fetchLines(statId) {
     const response = await axios.get('/api/station/' + statId); 
-    //return response.data; // e.g. [{line_id: 1}, {line_id: 2}, ...}]
-    return response.data.map(line => line.line_id);
-
+    return response.data.map(line => line.line_id);  // e.g. [1,2,3...]
   }
 
   async getDirectRoute(linesWithStrt, linesWithEnd) {
@@ -92,7 +86,7 @@ class TripPlanner extends React.Component {
     const sharedLine = this.filterSharedLine(linesWithStrt, linesWithEnd);
 
     //yes? 
-         // getStopsInfo to check each shared line, 
+      // getStopsInfo to check this shared line, 
     if (sharedLine) {
       await Promise.all(sharedLine.map(async lineId => {
         const validLine = await this.getStopsInfo(lineId, this.state.strtStaId, this.state.endStaId);
@@ -100,16 +94,15 @@ class TripPlanner extends React.Component {
         // vaild? add to directRoutes array. 
         if (validLine) {
           directRoutes.push(lineId);
-
-          // display stops only for the first match, 
+          // set stops only for the first match, 
           this.state.stops.length === 0 && this.setState({stops: validLine.stops});
         };
       }));
-
-      this.setState({ line: directRoutes});
+      this.setState({ line: directRoutes}); 
+      //console.log('directRoutes are ', this.state.line);
     };
-
-    return directRoutes.length !== 0;  // return back to getDirection.
+    
+    return directRoutes.length !== 0;  // back to getDirection.
   };
 
 
@@ -136,7 +129,7 @@ class TripPlanner extends React.Component {
       stopsPiece = stops.slice(strtIndex, endIndex + 1);
       distance = endIndex - strtIndex;
 
-      console.log('getStopsInfo, line id is ', lineId, ' start Index is ', strtIndex, ' end Index is ', endIndex, ' distance is ', distance);
+      //console.log('getStopsInfo, line id is ', lineId, ' start Index is ', strtIndex, ' end Index is ', endIndex, ' distance is ', distance);
       return {distance: distance, stops: stopsPiece};   
     };
   }
