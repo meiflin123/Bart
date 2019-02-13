@@ -60,12 +60,11 @@ class TripPlanner extends React.Component {
     
     const linesWithStrtSta = await this.fetchLines(this.state.strtStaId);
     const linesWithEndSta = await this.fetchLines(this.state.endStaId);
-    this.setState({ linesWithStrtSta, linesWithEndSta });
     
-    const directRoute = await this.getDirectRoute(this.state.linesWithStrtSta, this.state.linesWithEndSta);
+    const directRoute = await this.getDirectRoute(linesWithStrtSta, linesWithEndSta);
     // is there direct route? no? transfer.
     if (!directRoute) {
-      this.transfer(this.state.linesWithStrtSta, this.state.linesWithEndSta);
+      this.transfer(linesWithStrtSta, linesWithEndSta);
     }
 
     const { circles, lineNames,toward } = await this.getLineHead(this.state.line);
@@ -86,7 +85,7 @@ class TripPlanner extends React.Component {
     const sharedLine = this.filterSharedLine(linesWithStrt, linesWithEnd);
 
     //yes? 
-      // getStopsInfo to check this shared line, 
+      // getStopsInfo to check each shared line, 
     if (sharedLine) {
       await Promise.all(sharedLine.map(async lineId => {
         const validLine = await this.getStopsInfo(lineId, this.state.strtStaId, this.state.endStaId);
@@ -101,7 +100,7 @@ class TripPlanner extends React.Component {
       this.setState({ line: directRoutes}); 
       //console.log('directRoutes are ', this.state.line);
     };
-    
+
     return directRoutes.length !== 0;  // back to getDirection.
   };
 
