@@ -54,39 +54,26 @@ class TripPlanner extends React.Component {
   };
   
   // invoke getDirection once user click 'Go'
-    // hide the second <DirectionSteps /> and empty stops
-
+  
   async getDirection() {
-
+    // set beginning with no stops and hide transfer JSX.
     this.setState({ stops: [], isHidden: true });
-    const LinesOfStations = await this.fetchLines();
+    // fetch lines that have the starting station that user selected. 
+    const linesWithStrtSta = await this.fetchLines(this.state.strtStaId);
+     // fetch lines that have the ending station that user selected.
+    const linesWithEndSta = await this.fetchLines(this.state.endStaId);
+
+    this.setState({ linesWithStrtSta, linesWithEndSta });
+    // is there direct route?
     const shareLine = await this.getDirectRoute(this.state.linesWithStrtSta, this.state.linesWithEndSta);
     
   }  
 
-  async fetchLines() {
-
-    // fetch lines that have the starting station. 
-    // fetch lines that have the ending station.
-  
-    console.log('starting station is ' + this.state.strtSta + ' station_id is ' + this.state.strtStaId);
-    console.log('ending station is ' + this.state.endSta + ' station_id is ' + this.state.endStaId)
-
-
-    const responseStrt = await axios.get('/api/station/' + this.state.strtStaId)
-    const linesWithStrtSta = responseStrt.data
-    this.setState({linesWithStrtSta});
-
-    const responseEnd = await axios.get('/api/station/' + this.state.endStaId)
-    const linesWithEndSta = responseEnd.data
-    this.setState({linesWithEndSta});
-
-    console.log('list of lines having the selected start station : ' , this.state.linesWithStrtSta);
-    console.log('list of lines having the selected ending station : ' , this.state.linesWithEndSta);
+  async fetchLines(statId) {
+    const response = await axios.get('/api/station/' + statId); 
+    return response.data; // e.g. [{line_id = 1, line_id = 2, ...}]
 
   }
-
-  // look for direct route from lines with start station and lines with ending station. 
 
   async getDirectRoute(linesWithStrt, linesWithEnd) {
 
@@ -350,7 +337,7 @@ class TripPlanner extends React.Component {
             <DirectionStep stops={ this.state.stops } circles={ this.state.circles } lineNames={ this.state.lineNames } toward ={ this.state.toward } />
 
         {!this.state.isHidden &&
-          <div>
+          <div className="change-train">
             <div className="directions-step">
               <div className="directions-line-header">
                 <p className="line-name">Change Trains at {this.state.trfSta} Station</p>
