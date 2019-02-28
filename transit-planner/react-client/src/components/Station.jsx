@@ -31,7 +31,7 @@ class Station extends React.Component {
 
   render() {
     return (
-      
+
         <div className="station">
            <li onClick = { this.toggleFavStation } value = { this.props.station.station_id }>
            {

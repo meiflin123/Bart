@@ -5,65 +5,47 @@ import StopsList from  './StopsList.jsx';
 class Lines extends React.Component {
   constructor(props) {
     super(props);
-
     this.state = {
       lines: [],
       stops: []
     };
-    this.selectLine = this.selectLine.bind(this);
   };
 
+ // get all existing lines from db
   getAllLines() {
     axios.get('/api/lines')
-      .then(
-        (response) => {
-        this.setState({lines : response.data});     
-        
-      })
-      .catch((error) => {
-        console.log(error);
-      })
+      .then(response => this.setState({ lines : response.data }))
+      .catch(error => console.log(error))
   };
-  
 
   selectLine(e) {
     this.getStops(e.target.value);
  };
 
+  // get the list of stops along a line.
   getStops(lineId) {
-    console.log('line selected is: ' + lineId);
-
     axios.get('/api/lines/' + lineId)
-      .then(response => {
-        const stops = response.data;
-        this.setState({stops: stops})
-        console.log('all stops along this line:', this.state.stops);
-      })
-
-      .catch(error => {
-        console.log(error);
-      });
+      .then(response => this.setState({ stops: response.data }))
+      .catch(error => console.log(error))
 
   };
 
   componentDidMount (){
     this.getAllLines();
-    this.getStops(1)
+    this.getStops(1);
+  };
 
-  }
   render () {
     return (
       <div className="lines-view">
         <div className="selections">
           Choose a line:
-         
-         <select onChange= { this.selectLine }>{ this.state.lines.map(line => <option value={line.id} key={line.id}>{ line.name }</option>)}
-            
-          </select>
-
+         <select onChange= { this.selectLine.bind(this) }>{ this.state.lines.map(line => <option value={line.id} key={line.id}>{ line.name }</option>)}       
+         </select>
         </div>
+
         <div className="lines-stop-list">
-          {<StopsList stopsList={ this.state.stops }/>}
+          <StopsList stopsList={ this.state.stops }/>
         </div>
       </div>
     );

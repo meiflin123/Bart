@@ -14,8 +14,6 @@ class TripPlanner extends React.Component {
       strtStaId: null,
       endSta: '',
       endStaId: null,
-      linesWithStrtSta: [],
-      linesWithEndSta: [],
       stops: [],
       trfLStops: [],
       toward: [],
@@ -65,18 +63,16 @@ class TripPlanner extends React.Component {
     // is there direct route? no? transfer.
     if (!directRoute) {
       this.transfer(linesWithStrtSta, linesWithEndSta);
-    }
+    };
 
     const { circles, lineNames,toward } = await this.getLineHead(this.state.line);
     this.setState({ circles, lineNames, toward });
-
-    
-  }  
+  };
 
   async fetchLines(statId) {
     const response = await axios.get('/api/station/' + statId); 
     return response.data.map(line => line.line_id);  // e.g. [1,2,3...]
-  }
+  };
 
   async getDirectRoute(linesWithStrt, linesWithEnd) {
     let directRoutes = [];
@@ -89,7 +85,6 @@ class TripPlanner extends React.Component {
     if (sharedLine) {
       await Promise.all(sharedLine.map(async lineId => {
         const validLine = await this.getStopsInfo(lineId, this.state.strtStaId, this.state.endStaId);
-
         // vaild? add to directRoutes array. 
         if (validLine) {
           directRoutes.push(lineId);
@@ -134,7 +129,7 @@ class TripPlanner extends React.Component {
   }
 
   async getLineHead(lines){
-
+/*
     let circles = [];
     let nameList= [];
     let lineNames = '';
@@ -175,10 +170,54 @@ class TripPlanner extends React.Component {
  
     console.log('circle is ', this.state.circles, ' line is ', this.state.lineNames, ' lines is ', lines);
 
-    return { circles: circles, lineNames: lineNames, toward: toward }
+    return { circles: circles, lineNames: lineNames, toward: toward }*/
+
+    
+    let circles = [];
+    let nameList= [];
+    let lineNames = '';
+    let destination = null;
+    let towardList = [];
+    let toward = '';
+
+  // get line color info for each single line in lines
+  for (let line of lines) {
+    const response = await axios.get('/api/linecolor/' + line);
+    const data = response.data[0];
+
+    circles.push(this.getCircle(data.color)) 
+    nameList.push(this.getLineName(data.name)); 
+    destination = this.getToward(data.name)
+
+    // e.g. line 7 and 9 both toward Warm Springs. Show only one Warm Spring.
+    if (!towardList.includes(destination)) {  
+      towardList.push(destination);
+    }
   }
 
+    lineNames = nameList.join(' or ');
+    toward = towardList.join(' / ');
+ 
+    console.log('circle is ', this.state.circles, ' line is ', this.state.lineNames, ' lines is ', lines);
 
+    return { circles: circles, lineNames: lineNames, toward: toward }
+
+
+  };
+
+  getCircle(colorCode) {  //e.g. colorCode = "e11a57"
+    return '#' + colorCode; 
+  };
+
+  getLineName(name) {   //name = "Red: towards Richmond"
+    return name.replace(':', '').split(' ')[0];  
+  };
+
+  getToward(name) {
+    const towardsIndex = name.indexOf('towards');  //e.g. name = "Orange: towards Warm Springs"
+    return name.slice(towardsIndex + 7);
+  };
+  
   async transfer(linesWithStrt, linesWithEnd) {
 
     // linesMix  = [ [1,2], [3,5], ...] for example.
