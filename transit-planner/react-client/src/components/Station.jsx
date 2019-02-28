@@ -6,36 +6,27 @@ class Station extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      // is station favorite?
-      station: this.props.station.is_favorite
+      favStation: this.props.station.is_favorite // a boolean 
     };
 
     this.toggleFavStation = this.toggleFavStation.bind(this);
-  }
+  };
 
-
-// toggleFavStation toggle the is_favorite status of a station from database. 
+// toggle the is_favorite status of a station in database. 
 	toggleFavStation(e) {
-
-	  console.log('stationId is ', e.target.value);
 	  const stationId = e.target.value;
-
 	  axios.post('/api/toggleFavStation/' + stationId)
-      .then(response => {
-        this.setState({ station: response.data });
-      })     
-      .catch(error => {
-         console.log(error);
-      });
-    };
+      .then(response => this.setState({ favStation: response.data }))     
+      .catch(error => console.log(error))
+  };
 
+  // render station name followed with a star if favorite, no star if not favorite. 
   render() {
     return (
-
         <div className="station">
            <li onClick = { this.toggleFavStation } value = { this.props.station.station_id }>
            {
-            this.state.station 
+            this.state.favStation 
              ? this.props.station.name + '  ⭐️' 
              : this.props.station.name
 
