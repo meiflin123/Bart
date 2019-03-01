@@ -73,18 +73,17 @@ class TripPlanner extends React.Component {
   };
 
   async getDirectRoute(linesWithStrt, linesWithEnd) {
+    // find share line
+    // record stops and routes for valid sharedLines 
     let directRoutes = [];
-    // any share line id?
     const sharedLine = linesWithStrt.filter(lineId => linesWithEnd.includes(lineId));   
     
-      // yes? getStopsInfo to check each shared line, 
     if (sharedLine.length!== 0) {
       await Promise.all(sharedLine.map(async lineId => {
-        const validLine = await this.getStopsInfo(lineId, this.state.strtStaId, this.state.endStaId);
-        // vaild? add line id to directRoutes array. 
+        const validLine = await this.checkStops(lineId, this.state.strtStaId, this.state.endStaId); 
+
         if (validLine) {
           directRoutes.push(lineId);
-          // record stops only for the first match
           this.state.stops.length === 0 && this.setState({stops: validLine.stops});
         };
       }));
@@ -92,22 +91,23 @@ class TripPlanner extends React.Component {
     };
     return directRoutes.length !== 0;  // back to getDirection.
   };
-
-  async getStopsInfo(lineId, strtId, endId) {
+  
+  async checkStops(lineId, strtId, endId) {
+    //check if the order of two stops on a line is correct
+      //yes? extract stops between them.
     const response = await axios.get('/api/lines/' + lineId);
     const allStops = response.data;
 
     const [strtIndex, endIndex] = this.getIndex(allStops, strtId, endId);
-
-    // also check if direction is correct,
     if(strtIndex!== undefined && endIndex!== undefined && strtIndex < endIndex) {
-      // extract stops from strtId to endId
+      
       const stops = allStops.slice(strtIndex, endIndex + 1);
       const distance = endIndex - strtIndex;
+
       return { distance, stops };   
     };
   }
-
+  
   getIndex(stopsList, ...stationIds) {
     return stationIds.map(id => stopsList.indexOf(stopsList.filter(stop => stop.station_id === id)[0]));
   }
@@ -245,8 +245,8 @@ class TripPlanner extends React.Component {
               let shareTrf = trfStaOn1.station_id;   
 
               // stops Count = distance between two stations on a line.
-              let stopsCountL2 = await this.getStopsInfo(line2, shareTrf, this.state.endStaId);
-              let stopsCountL1 = await this.getStopsInfo(line1, this.state.strtStaId, shareTrf);
+              let stopsCountL2 = await this.checkStops(line2, shareTrf, this.state.endStaId);
+              let stopsCountL1 = await this.checkStops(line1, this.state.strtStaId, shareTrf);
 
               // each time when stopsCountL2.distance  + stopsCountL1.distance < totDistance
                // update totDistance 
