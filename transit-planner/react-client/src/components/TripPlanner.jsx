@@ -35,9 +35,7 @@ class TripPlanner extends React.Component {
 // display all stations and those favorite ones would be on top of the list.
   async displayStaList() {
     const response = await axios.get('/api/stations/');
-    const stations = response.data
-    const staList = stations.sort((a, b) => b.is_favorite - a.is_favorite);
-    this.setState({ staList });
+    this.setState({ staList: response.data.sort((a, b) => b.is_favorite - a.is_favorite) });
   }
 
   // record user selected station name and station id.
@@ -335,12 +333,10 @@ class TripPlanner extends React.Component {
   // record start station and ending station and their IDs.
   renderSelect(select, point, pointId) {
     return (
-      <select onChange= { e => select(e, point, pointId) }>
-        <option>select a station </option>
+      <select onChange= { e => select(e, point, pointId) }><option>select a station </option>
         { this.state.staList.map(station => 
           <option 
-            value={ JSON.stringify([station.name, station.id])} 
-            key={ station.id }>
+            value={ JSON.stringify([station.name, station.id])} key={ station.id }>
             { station.name } 
           </option>
         )}
