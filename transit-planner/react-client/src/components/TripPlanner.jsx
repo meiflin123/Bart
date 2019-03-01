@@ -9,7 +9,7 @@ class TripPlanner extends React.Component {
     super(props);
 
     this.state = {
-      staList: [{'id': 0, 'name': 'select station'}],
+      staList: [],
       strtSta: '',
       strtStaId: null,
       endSta: '',
@@ -27,33 +27,33 @@ class TripPlanner extends React.Component {
       trfSta: '',
       isHidden: true,
     }
+    this.select = this.select.bind(this);
   }
+
+
 
 // display all stations and those favorite ones would be on top of the list.
   async displayStaList() {
     const response = await axios.get('/api/stations/');
     const stations = response.data
-    const fromFav = stations.sort((a, b) => b.is_favorite - a.is_favorite);
-    const staList = this.state.staList.concat(fromFav)
+    const staList = stations.sort((a, b) => b.is_favorite - a.is_favorite);
     this.setState({ staList });
   }
 
-  // get user selected station'name and station id.
-
-  selectStrt(e) {
-    const { strtSta, strtStaId } = JSON.parse(e.target.value);
-    this.setState({ strtSta, strtStaId });
+  // record user selected station name and station id.
+  select(e, point, pointId) {
+    const [ station, stationId ] = JSON.parse(e.target.value)
+    this.setState({
+      [ point ]: station,
+      [ pointId ]: stationId
+    });
   };
 
-  selectEnd(e) {
-    const { endSta, endStaId } = JSON.parse(e.target.value);
-    this.setState({ endSta, endStaId });
-  };
-  
   // invoke getDirection once user click 'Go'
   
   async getDirection() {
     // set beginning with no stops and hide transfer JSX.
+
     this.setState({ stops: [], isHidden: true });
     
     const linesWithStrtSta = await this.fetchLines(this.state.strtStaId);
@@ -332,21 +332,29 @@ class TripPlanner extends React.Component {
     this.displayStaList();
   }
 
+  // record start station and ending station and their IDs.
+  renderSelect(select, point, pointId) {
+    return (
+      <select onChange= { e => select(e, point, pointId) }>
+        <option>select a station </option>
+        { this.state.staList.map(station => 
+          <option 
+            value={ JSON.stringify([station.name, station.id])} 
+            key={ station.id }>
+            { station.name } 
+          </option>
+        )}
+      </select>
+    );
+  }
+
   render() {
     return (
       <div className="trip-planner-view">
         <div className="selections">
-          Start: 
-
-          <select onChange= {this.selectStrt.bind(this)}>{this.state.staList.map((station, index) => <option value={JSON.stringify({'strtSta': station.name, 'strtStaId': station.id})} key={index}>{station.name}</option>)}
-          </select>
-
+          Start: { this.renderSelect(this.select, 'strtSta', 'strtStaId') }
           <br />
-
-          End: 
-          <select onChange= {this.selectEnd.bind(this)}>{this.state.staList.map((station, index) => <option value={JSON.stringify({'endSta': station.name, 'endStaId': station.id})} key={index}>{station.name}</option>)}
-          </select>
-
+          End: { this.renderSelect(this.select, 'endSta', 'endStaId') }    
           <br />
 
           <button onClick ={this.getDirection.bind(this)}>Go!</button>
