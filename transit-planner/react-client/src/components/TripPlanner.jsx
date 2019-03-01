@@ -74,56 +74,42 @@ class TripPlanner extends React.Component {
 
   async getDirectRoute(linesWithStrt, linesWithEnd) {
     let directRoutes = [];
-
-    // compare two arrays, any share line id?
-    const sharedLine = this.filterSharedLine(linesWithStrt, linesWithEnd);
-
-    //yes? 
-      // getStopsInfo to check each shared line, 
-    if (sharedLine) {
+    // any share line id?
+    const sharedLine = linesWithStrt.filter(lineId => linesWithEnd.includes(lineId));   
+    
+      // yes? getStopsInfo to check each shared line, 
+    if (sharedLine.length!== 0) {
       await Promise.all(sharedLine.map(async lineId => {
         const validLine = await this.getStopsInfo(lineId, this.state.strtStaId, this.state.endStaId);
-        // vaild? add to directRoutes array. 
+        // vaild? add line id to directRoutes array. 
         if (validLine) {
           directRoutes.push(lineId);
-          // set stops only for the first match, 
+          // record stops only for the first match
           this.state.stops.length === 0 && this.setState({stops: validLine.stops});
         };
       }));
       this.setState({ line: directRoutes}); 
-      //console.log('directRoutes are ', this.state.line);
     };
-
     return directRoutes.length !== 0;  // back to getDirection.
   };
 
+  async getStopsInfo(lineId, strtId, endId) {
+    const response = await axios.get('/api/lines/' + lineId);
+    const allStops = response.data;
 
-  filterSharedLine(lineList1, lineList2) {
-    const sharedLine = lineList1.filter(line => lineList2.includes(line));
-    return sharedLine.length !==  0 ? sharedLine : false;
+    const [strtIndex, endIndex] = this.getIndex(allStops, strtId, endId);
+
+    // also check if direction is correct,
+    if(strtIndex!== undefined && endIndex!== undefined && strtIndex < endIndex) {
+      // extract stops from strtId to endId
+      const stops = allStops.slice(strtIndex, endIndex + 1);
+      const distance = endIndex - strtIndex;
+      return { distance, stops };   
+    };
   }
 
-  async getStopsInfo(lineId, strtId, endId) {
-   
-    const response = await axios.get('/api/lines/' + lineId);
-    const stops = response.data;
-
-    let strtIndex = stops.indexOf(stops.filter(stop => stop.station_id === strtId)[0]);  
-    let endIndex = stops.indexOf(stops.filter(stop => stop.station_id === endId)[0]);
-  
-    let distance;
-    let stopsPiece = [];
-
-   // if start index AND end index AND the order is correct,
-    if(strtIndex!== undefined && endIndex!== undefined && strtIndex < endIndex) {
-
-      // get stops from strtId to endId
-      stopsPiece = stops.slice(strtIndex, endIndex + 1);
-      distance = endIndex - strtIndex;
-
-      //console.log('getStopsInfo, line id is ', lineId, ' start Index is ', strtIndex, ' end Index is ', endIndex, ' distance is ', distance);
-      return {distance: distance, stops: stopsPiece};   
-    };
+  getIndex(stopsList, ...stationIds) {
+    return stationIds.map(id => stopsList.indexOf(stopsList.filter(stop => stop.station_id === id)[0]));
   }
 
   async getLineHead(lines){
