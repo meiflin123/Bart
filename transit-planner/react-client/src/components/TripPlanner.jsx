@@ -1,6 +1,6 @@
 import React from 'react';
 import axios from 'axios';
-import Directions from './Directions.jsx';
+import DirectionsSummary from './Directions.jsx';
 import Lines from './Lines.jsx';
 
 class TripPlanner extends React.Component {
@@ -134,7 +134,7 @@ class TripPlanner extends React.Component {
   }
     lineNames = nameList.join(' or ');
     toward = towardList.join(' / ');
-    
+
     return { circles, lineNames, toward }
   };
 
@@ -261,7 +261,7 @@ class TripPlanner extends React.Component {
           <button onClick ={this.getDirection.bind(this)}>Go!</button>
         </div>
 
-        <Directions strtSta={ strtSta } 
+        <DirectionsSummary strtSta={ strtSta } 
                     endSta={ endSta } 
                     stops={ stops } 
                     circles={ circles } 
