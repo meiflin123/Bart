@@ -30,8 +30,6 @@ class TripPlanner extends React.Component {
     this.select = this.select.bind(this);
   }
 
-
-
 // display all stations and those favorite ones would be on top of the list.
   async displayStaList() {
     const response = await axios.get('/api/stations/');
@@ -113,49 +111,6 @@ class TripPlanner extends React.Component {
   }
 
   async getLineHead(lines){
-/*
-    let circles = [];
-    let nameList= [];
-    let lineNames = '';
-    let destination = null;
-    let towardList = [];
-    let toward = '';
-
-  // get line info for each single line in lines
-  for (let line of lines) {
-    const response = await axios.get('/api/linecolor/' + line);
-    const data = response.data[0];
-
-    //get line circle
-      //from db, e.g. data.color = "e11a57"
-    circles.push('#' + data.color)
-    
-
-    //get line name
-      //from db, e.g. data.name = "Red: towards Richmond"
-    const name = data.name.replace(':', '').split(' ')
-    nameList.push(name[0]); //'Red'
-
-
-    //get toward
-      //from db, e.g. data.name = "Orange: towards Warm Springs"
-    const towardsIndex = data.name.indexOf('towards');
-    destination = data.name.slice(towardsIndex + 7); //'Warm Springs'
-
-
-    // e.g. line 7 and 9 both toward Warm Springs. Show only one Warm Spring.
-    if (!towardList.includes(destination)) {  
-      towardList.push(destination);
-    }
-  }
-
-    lineNames = nameList.join(' or ');
-    toward = towardList.join(' / ');
- 
-    console.log('circle is ', this.state.circles, ' line is ', this.state.lineNames, ' lines is ', lines);
-
-    return { circles: circles, lineNames: lineNames, toward: toward }*/
-
     
     let circles = [];
     let nameList= [];
@@ -178,14 +133,9 @@ class TripPlanner extends React.Component {
       towardList.push(destination);
     }
   }
-
     lineNames = nameList.join(' or ');
     toward = towardList.join(' / ');
- 
-    console.log('circle is ', this.state.circles, ' line is ', this.state.lineNames, ' lines is ', lines);
-
     return { circles: circles, lineNames: lineNames, toward: toward }
-
 
   };
 
@@ -203,19 +153,10 @@ class TripPlanner extends React.Component {
   };
   
   async transfer(linesWithStrt, linesWithEnd) {
-
-    // linesMix  = [ [1,2], [3,5], ...] for example.
-    // axios get the transfer stations for each pair 
-      // if any share transfer station
-        // test direction and distance from start station to trf, from trf to end station.
-          // get the shoretest route ( smallest tot of stops)
-
-        // display stops from start stop to transfer stop from line1
-        // display stops from transfer stop to ending stop from line2
-      // if no transfer station, also previously confirmed no direct route?
-        // no such case. (no codes)
-
-    let linesMix = this.createLineMix(linesWithStrt, linesWithEnd);
+    // generate possible matches
+    // for each pair, check if there's shared transfer station
+      // yes? get the route with least # of tot stops.
+    const linesMix = this.generateMix(linesWithStrt, linesWithEnd); //e.g. [ [1,2], [3,5], ...]
     let totDistance = 100;
     let line = [];
     let trfLine = [];
@@ -224,85 +165,58 @@ class TripPlanner extends React.Component {
     let trfLStops = [];
     
     for (let linePair of linesMix) {
-      let [line1, line2] = linePair;
+      const [line1, line2] = linePair;
+    
+      const trfStasOnL1 = await this.fetchTrfStation(line1);
+      const trfStasOnL2 = await this.fetchTrfStation(line2);
 
-      // fetch transfer stations of line1
-      let response1 = await axios.get('/api/transfer/' + line1);
-      let trfStasOnL1 = response1.data;
-      console.log('transferStations on line 1 ',line1,' are ', JSON.stringify(trfStasOnL1));
+      const shareTrf = this.findSharedTrf(trfStasOnL1, trfStasOnL2);
 
-      //fetch transfer stations from line2
-      let response2 = await axios.get('/api/transfer/' + line2)
-      let trfStaOnL2 = response2.data;
-      console.log('transferStations on line 2', line2, ' are ', JSON.stringify(trfStaOnL2));
+      const stopsCountL1 = await this.checkStops(line1, this.state.strtStaId, shareTrf);
+      const stopsCountL2 = await this.checkStops(line2, shareTrf, this.state.endStaId); 
 
-      
-        for (let trfStaOn1 of trfStasOnL1) {
-          for (let trfStaOn2 of trfStaOnL2) {
-
-            // share trf station?
-            if (trfStaOn1.station_id === trfStaOn2.station_id) {
-              let shareTrf = trfStaOn1.station_id;   
-
-              // stops Count = distance between two stations on a line.
-              let stopsCountL2 = await this.checkStops(line2, shareTrf, this.state.endStaId);
-              let stopsCountL1 = await this.checkStops(line1, this.state.strtStaId, shareTrf);
-
-              // each time when stopsCountL2.distance  + stopsCountL1.distance < totDistance
-               // update totDistance 
-               // assign correct line2
-               // assign correct line1
-               // assign trf Id
-              // if equal
-               // if not duplicated
-                // add correct lines
-
-              if (stopsCountL1 && stopsCountL2) {
-                let totStops = stopsCountL1.distance + stopsCountL2.distance;
-            
-                if (totStops < totDistance) {
-                  totDistance = totStops;
-                  trfLine = [line2];
-                  line = [line1];
-                  trfSta = stopsCountL2.stops[0].name;
-                  trfLStops = stopsCountL2.stops;
-                  stops = stopsCountL1.stops;
-                }
-
-                if (totStops === totDistance) {
-                   if (!line.includes(line1)) {
-                     line.push(line1);
-                   }
-
-                   if (!trfLine.includes(line2)) {
-                     trfLine.push(line2);
-                   }
-                } 
-              }
-
-            }
-          }
+      if (stopsCountL1 && stopsCountL2) {
+        const totStops = stopsCountL1.distance + stopsCountL2.distance;
+    
+        if (totStops < totDistance) {
+          totDistance = totStops;
+          trfLine = [line2];
+          line = [line1];
+          trfSta = stopsCountL2.stops[0].name;
+          trfLStops = stopsCountL2.stops;
+          stops = stopsCountL1.stops;
         }
-      }     
-    
-    this.setState({line, trfLine});
+        
+        if (totStops === totDistance) {
+           if (!line.includes(line1)) { line.push(line1)}
+           if (!trfLine.includes(line2)) {trfLine.push(line2)}
+        } 
+      }
 
-    let {circles, lineNames, toward}= await this.getLineHead(this.state.line);
-    let trfLineHeader = await this.getLineHead(this.state.trfLine);
+    }
+
+    let {circles, lineNames, toward}= await this.getLineHead(line);
+    let trfLineHeader = await this.getLineHead(trfLine);
     
-    this.setState({ stops, circles, lineNames, toward, trfLStops, trfSta,
+    this.setState({ line, trfLine, stops, circles, lineNames, toward, trfLStops, trfSta,
       trfCircles: trfLineHeader.circles, 
       trfLineNames: trfLineHeader.lineNames, 
       trfToward:trfLineHeader.toward,
       isHidden: false
     });
-
-    console.log('line2 is ', trfLine, 'line1 is ', line, 'totDistance is ', totDistance, ' stops are ', stops)
-    console.log(this.state.circles, this.state.lineNames, this.state.toward, this.state.trfCircles, this.state.trfLineNames, this.state.trfToward)
-
   }
 
-  createLineMix(lineList1, lineList2) {
+  findSharedTrf(list1, list2) {
+    for (let station1 of list1) {
+      for (let station2 of list2) {
+        if (station1.station_id === station2.station_id) {
+          return station1.station_id;
+        }
+      }
+    }
+  }
+
+  generateMix(lineList1, lineList2) {
     let linesMix = [];
     for (const line1 of lineList1) {
       for (const line2 of lineList2) {
@@ -312,6 +226,11 @@ class TripPlanner extends React.Component {
     return linesMix;
   }
 
+  async fetchTrfStation(lineId) {
+    const response = await axios.get('/api/transfer/' + lineId);
+    return response.data;
+  }
+  
   componentDidMount() {
     this.displayStaList();
   }
