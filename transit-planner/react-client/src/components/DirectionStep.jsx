@@ -1,20 +1,19 @@
 import React from 'react';
 
-const DirectionStep = props => {
-  console.log(props)
- 
+const DirectionStep = ({ circles, stops, lineNames, toward }) => {
+
   return (
 
     <div className="directions-step">
       <div className="directions-line-header">
 
-        {props.circles.map((circle, index) => (<div key= {index} className="line-circle" style={{backgroundColor: circle}}></div>))}
+        { circles.map(( circle, index ) => (<div key= { index } className="line-circle" style={{ backgroundColor: circle }}></div>))}
 
-        <p className="line-name">{props.lineNames} Line</p>
-        <p className="line-direction">towards {props.toward}</p>
+        <p className="line-name">{ lineNames} Line</p>
+        <p className="line-direction">towards { toward }</p>
       </div>
         <ul>
-          {props.stops.map((stop) => (<li key={stop.id}>{stop.name}</li>))}
+          { stops.map((stop) => (<li key={stop.id}>{stop.name}</li>))}
         </ul>
       </div>
 

@@ -1,8 +1,7 @@
 import React from 'react';
 import axios from 'axios';
-import DirectionStep from './DirectionStep.jsx';
+import Directions from './Directions.jsx';
 import Lines from './Lines.jsx';
-
 
 class TripPlanner extends React.Component {
   constructor(props) {
@@ -135,8 +134,8 @@ class TripPlanner extends React.Component {
   }
     lineNames = nameList.join(' or ');
     toward = towardList.join(' / ');
-    return { circles: circles, lineNames: lineNames, toward: toward }
-
+    
+    return { circles, lineNames, toward }
   };
 
   getCircle(colorCode) {  //e.g. colorCode = "e11a57"
@@ -250,6 +249,7 @@ class TripPlanner extends React.Component {
   }
 
   render() {
+    const { strtSta, endSta, stops, circles, lineNames, toward, trfLStops, trfCircles, trfLineNames, trfToward, isHidden } = this.state;
     return (
       <div className="trip-planner-view">
         <div className="selections">
@@ -261,37 +261,18 @@ class TripPlanner extends React.Component {
           <button onClick ={this.getDirection.bind(this)}>Go!</button>
         </div>
 
-        <div className="directions">
-          <div className="directions-summary">
-            <p className="line-name">{ this.state.strtSta } to { this.state.endSta }</p>
-            <p>31 minutes (arrive at 5:51pm)</p>
-          </div>
-
-          <div className="directions-step">
-            <div className="directions-line-header">
-              <p className="line-name">Start at { this.state.strtSta }</p>
-            </div>
-          </div>
-          
-            <DirectionStep stops={ this.state.stops } circles={ this.state.circles } lineNames={ this.state.lineNames } toward ={ this.state.toward } />
-
-        {!this.state.isHidden &&
-          <div className="change-train">
-            <div className="directions-step">
-              <div className="directions-line-header">
-                <p className="line-name">Change Trains at {this.state.trfSta} Station</p>
-              </div>
-            </div>
-             
-              <DirectionStep stops= { this.state.trfLStops } circles={ this.state.trfCircles } lineNames={ this.state.trfLineNames } toward={ this.state.trfToward } />
-          </div>
-        } 
-          <div className="directions-step">
-            <div className="directions-line-header">
-              <p className="line-name">Arrive at { this.state.endSta }</p>
-            </div>
-          </div>
-        </div>
+        <Directions strtSta={ strtSta } 
+                    endSta={ endSta } 
+                    stops={ stops } 
+                    circles={ circles } 
+                    lineNames={ lineNames } 
+                    toward={ toward } 
+                    trfLStops={ trfLStops } 
+                    trfCircles={ trfCircles } 
+                    trfLineNames={ trfLineNames } 
+                    trfToward={ trfToward } 
+                    isHidden={ isHidden } 
+        />
       </div>
     )
   }
