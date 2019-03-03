@@ -1,6 +1,6 @@
 import React from 'react';
 import axios from 'axios';
-import DirectionsSummary from './Directions.jsx';
+import DirectionsSummary from './DirectionsSummary.jsx';
 import Lines from './Lines.jsx';
 
 class TripPlanner extends React.Component {

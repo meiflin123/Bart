@@ -2,7 +2,7 @@ import React from 'react';
 import DirectionStep from './DirectionStep.jsx';
 import DirectionsLineHeader from './DirectionsLineHeader.jsx'
 
-const Directions = ({ strtSta, endSta, stops, circles, lineNames, toward, trfLStops, trfCircles, trfLineNames, trfToward, isHidden }) => {
+const DirectionsSummary = ({ strtSta, endSta, stops, circles, lineNames, toward, trfLStops, trfCircles, trfLineNames, trfToward, isHidden }) => {
   return (
     <div className="directions">
       <div className="directions-summary">
@@ -25,6 +25,6 @@ const Directions = ({ strtSta, endSta, stops, circles, lineNames, toward, trfLSt
 
 }
 
-export default Directions
+export default DirectionsSummary;
 
  
