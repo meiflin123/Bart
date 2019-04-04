@@ -72,6 +72,7 @@ class TripPlanner extends React.Component {
   async getDirectRoute(linesWithStrt, linesWithEnd) {
     // find share line
     // record stops and routes for valid sharedLines 
+    
     let directRoutes = [];
     const sharedLine = linesWithStrt.filter(lineId => linesWithEnd.includes(lineId));   
     
