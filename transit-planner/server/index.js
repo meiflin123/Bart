@@ -11,7 +11,7 @@ const getTransfer = require('../database-mysql/index.js').getTransfer;
 const db = require('../database-mysql');
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
