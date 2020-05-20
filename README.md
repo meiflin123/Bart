@@ -1,5 +1,5 @@
 # react-bart
-This is a solo project I completed as a student at hackreactor. It's a full-stack application that implements several features of an app to help people navigate the SF Bay Area's BART transportation network, similar to the [Moovit](https://moovitapp.com) app. 
+It's a full-stack application that implements several features of an app to help people navigate the SF Bay Area's BART transportation network, similar to the [Moovit](https://moovitapp.com) app. 
 
 ### app features:
 1. A **Lines** view that allows the user to </br>
