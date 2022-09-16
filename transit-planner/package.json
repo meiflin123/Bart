@@ -20,7 +20,7 @@
     "angular": "^1.6.5",
     "axios": "^0.18.0",
     "body-parser": "^1.17.2",
-    "bootstrap": "^3.3.7",
+    "bootstrap": "^3.4.1",
     "express": "^4.15.4",
     "jquery": "^3.2.1",
     "mongoose": "^4.11.6",
